@@ -1,67 +1,125 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  FaHome,
-  FaUsers,
-  FaWallet,
-  FaChartLine,
-  FaGift,
-  FaShareAlt,
-  FaTicketAlt,
-  FaFileAlt,
-  FaUserTie,
-  FaMoneyBillWave,
-  FaCoins,
-  FaFileInvoice,
-} from 'react-icons/fa';
+  XMarkIcon,
+  HomeIcon,
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  UserIcon,
+  DocumentTextIcon,
+  GiftIcon,
+  SparklesIcon,
+  TicketIcon,
+  Cog6ToothIcon,
+  ArrowRightOnRectangleIcon,
+} from '@heroicons/react/24/outline';
 
-const Sidebar = ({ isOpen, setIsOpen }) => {
+const Sidebar = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const menuItems = [
-   { path: '/', icon: FaHome, label: 'Dashboard' },
-    { path: '/users', icon: FaUsers, label: 'Users' },
-    { path: '/investments', icon: FaWallet, label: 'Investments' },
-    { path: '/plans', icon: FaChartLine, label: 'Plans' },
-    { path: '/offers', icon: FaGift, label: 'Offers' },
-    { path: '/referrals', icon: FaShareAlt, label: 'Referrals' },
-    { path: '/tickets', icon: FaTicketAlt, label: 'Tickets' },
-    { path: '/documents', icon: FaFileAlt, label: 'Documents' },
-    { path: '/nominees', icon: FaUserTie, label: 'Nominees' },
-    { path: '/returns', icon: FaMoneyBillWave, label: 'Returns' },
-    // { path: '/commissions', icon: FaCoins, label: 'Commissions' },
-    { path: '/balance-sheets', icon: FaFileInvoice, label: 'Balance Sheets' },
-    { path: '/points', icon: FaCoins, label: 'Points' },
+    { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
+    { path: '/investments', label: 'Investments', icon: ChartBarIcon },
+    { path: '/returns', label: 'Returns', icon: CurrencyDollarIcon },
+    { path: '/profile', label: 'Profile', icon: UserIcon },
+    { path: '/balance-sheet', label: 'Balance Sheet', icon: DocumentTextIcon },
+    { path: '/documents', label: 'Documents', icon: DocumentTextIcon },
+    { path: '/referrals', label: 'Referrals', icon: GiftIcon },
+    { path: '/points', label: 'Points', icon: SparklesIcon },
+    { path: '/tickets', label: 'Tickets', icon: TicketIcon },
+    { path: '/settings', label: 'Settings', icon: Cog6ToothIcon },
   ];
 
-  return (
-    <div
-      className={`fixed left-0 top-0 h-full bg-primary-800 text-white transition-all duration-300 z-50 ${
-        isOpen ? 'w-64' : 'w-20'
-      }`}
-    >
-      <div className="flex items-center justify-center h-16 border-b border-primary-700">
-        <span className={`font-bold text-xl ${!isOpen && 'hidden'}`}>KKFINSURE</span>
-        <span className={`font-bold text-2xl ${isOpen && 'hidden'}`}>K</span>
+  const handleNavigation = (path) => {
+    navigate(path);
+    if (window.innerWidth < 768) {
+      onClose();
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+    onClose();
+  };
+
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <h2 className="text-xl font-bold text-blue-600">KKFINSUREAPP</h2>
+        <button
+          onClick={onClose}
+          className="p-1 rounded-md hover:bg-gray-100 md:hidden"
+        >
+          <XMarkIcon className="h-6 w-6 text-gray-600" />
+        </button>
       </div>
 
-      <nav className="mt-4">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 mx-2 rounded-lg transition-colors ${
+      {/* Menu Items */}
+      <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <button
+              key={item.path}
+              onClick={() => handleNavigation(item.path)}
+              className={`flex items-center w-full px-4 py-3 rounded-lg transition-colors ${
                 isActive
-                  ? 'bg-primary-700 text-white'
-                  : 'text-primary-100 hover:bg-primary-700 hover:text-white'
-              } ${!isOpen && 'justify-center'}`
-            }
-          >
-            <item.icon className={`text-xl ${isOpen ? 'mr-3' : ''}`} />
-            {isOpen && <span className="text-sm">{item.label}</span>}
-          </NavLink>
-        ))}
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <item.icon className={`h-5 w-5 mr-3 ${
+                isActive ? 'text-blue-600' : 'text-gray-500'
+              }`} />
+              <span className="font-medium text-sm">{item.label}</span>
+            </button>
+          );
+        })}
       </nav>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-gray-200">
+        <button
+          onClick={handleLogout}
+          className="flex items-center w-full px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <ArrowRightOnRectangleIcon className="h-5 w-5 mr-3" />
+          <span className="font-medium text-sm">Logout</span>
+        </button>
+      </div>
     </div>
+  );
+
+  // Desktop sidebar - always visible
+  if (window.innerWidth >= 768) {
+    return (
+      <div className="hidden md:block md:w-64 md:flex-shrink-0 h-screen sticky top-0 border-r border-gray-200 bg-white overflow-y-auto">
+        {sidebarContent}
+      </div>
+    );
+  }
+
+  // Mobile sidebar - overlay
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:hidden ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {sidebarContent}
+      </div>
+    </>
   );
 };
 

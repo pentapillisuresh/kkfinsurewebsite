@@ -1,11 +1,27 @@
+
 import React from 'react';
 
-const LoadingSpinner = () => {
-  return (
-    <div className="flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-    </div>
+const LoadingSpinner = ({ size = 'md', fullScreen = false }) => {
+  const sizeClasses = {
+    sm: 'h-4 w-4',
+    md: 'h-8 w-8',
+    lg: 'h-12 w-12',
+    xl: 'h-16 w-16',
+  };
+
+  const spinner = (
+    <div className={`${sizeClasses[size]} animate-spin rounded-full border-4 border-gray-200 border-t-blue-600`} />
   );
+
+  if (fullScreen) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        {spinner}
+      </div>
+    );
+  }
+
+  return spinner;
 };
 
 export default LoadingSpinner;

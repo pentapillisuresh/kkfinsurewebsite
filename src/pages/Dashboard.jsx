@@ -1,209 +1,130 @@
-import React, { useState, useEffect } from 'react';
-import { adminApi } from '../api/adminApi';
-import StatsCard from '../components/common/StatsCard';
-import LoadingSpinner from '../components/common/LoadingSpinner';
-import { FaUsers, FaWallet, FaMoneyBillWave, FaTicketAlt } from 'react-icons/fa';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import toast from 'react-hot-toast';
+import React from 'react';
+import { useApi } from '../hooks/useApi';
+import { userApi } from '../api';
+import {
+  CurrencyRupeeIcon,
+  ChartBarIcon,
+  UserGroupIcon,
+  ArrowTrendingUpIcon,
+} from '@heroicons/react/24/outline';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [recentUsers, setRecentUsers] = useState([]);
-  const [monthlyData, setMonthlyData] = useState([]);
-  const [pieData, setPieData] = useState([]);
-  const [totalReturns, setTotalReturns] = useState(0);
+  const { data, loading } = useApi(userApi.getDashboard);
 
-  const COLORS = ['#3b82f6', '#10b981', '#f59e0b'];
+  const stats = data?.summary || {};
+  const investments = data?.investments || [];
+  const monthlyReturns = data?.monthlyReturns || [];
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const response = await adminApi.getDashboard();
-      
-      if (response.success) {
-        const { stats, monthlyActivity, investmentOverview, recentUsers } = response.data;
-        
-        setStats({
-          totalUsers: stats.totalUsers,
-          newUsersThisMonth: stats.newUsersThisMonth,
-          activeInvestments: stats.activeInvestments,
-          returnsThisMonth: stats.totalReturnsThisMonth,
-          pendingTickets: stats.pendingTickets,
-          totalReturnsOverall: stats.totalReturnsOverall,
-        });
-        
-        setTotalReturns(stats.totalReturnsOverall);
-        
-        // Transform monthlyActivity for bar chart
-        const chartData = monthlyActivity.map(item => ({
-          month: item.month,
-          users: item.newUsers,
-          investments: item.newInvestments,
-        }));
-        setMonthlyData(chartData);
-        
-        // Transform investmentOverview for pie chart
-        const pieChartData = investmentOverview.map(item => ({
-          name: item.status.charAt(0).toUpperCase() + item.status.slice(1),
-          value: item.count,
-        }));
-        setPieData(pieChartData);
-        
-        setRecentUsers(recentUsers || []);
-      } else {
-        toast.error(response.message || 'Failed to load dashboard data');
-      }
-    } catch (error) {
-      console.error('Dashboard fetch error:', error);
-      toast.error('Failed to load dashboard data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const statCards = [
+    {
+      title: 'Total Invested',
+      value: `₹${(stats.totalInvested || 0).toLocaleString()}`,
+      icon: CurrencyRupeeIcon,
+      color: 'bg-blue-500',
+    },
+    {
+      title: 'Total Returns',
+      value: `₹${(stats.totalPaidReturns || 0).toLocaleString()}`,
+      icon: ArrowTrendingUpIcon,
+      color: 'bg-green-500',
+    },
+    {
+      title: 'Active Investments',
+      value: stats.totalInvestments || 0,
+      icon: ChartBarIcon,
+      color: 'bg-purple-500',
+    },
+    {
+      title: 'Total Profit',
+      value: `₹${(stats.totalProfit || 0).toLocaleString()}`,
+      icon: UserGroupIcon,
+      color: 'bg-orange-500',
+    },
+  ];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner />
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  const statCards = [
-    {
-      title: 'Total Users',
-      value: stats?.totalUsers || 0,
-      icon: FaUsers,
-      color: 'bg-blue-500',
-      change: `+${stats?.newUsersThisMonth || 0} this month`,
-    },
-    {
-      title: 'Active Investments',
-      value: stats?.activeInvestments || 0,
-      icon: FaWallet,
-      color: 'bg-green-500',
-      change: `${pieData.find(d => d.name === 'Active')?.value || 0} active`,
-    },
-    {
-      title: 'Total Returns',
-      value: `₹${(stats?.returnsThisMonth || 0).toLocaleString()}`,
-      icon: FaMoneyBillWave,
-      color: 'bg-purple-500',
-      change: `₹${(stats?.totalReturnsOverall || 0).toLocaleString()} overall`,
-    },
-    {
-      title: 'Pending Tickets',
-      value: stats?.pendingTickets || 0,
-      icon: FaTicketAlt,
-      color: 'bg-orange-500',
-      change: stats?.pendingTickets > 0 ? 'Need attention' : 'All resolved',
-    },
-  ];
-
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat) => (
-          <StatsCard key={stat.title} {...stat} />
+      <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((stat, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-xl shadow-sm p-4 border border-gray-100"
+          >
+            <div className="flex items-center justify-between">
+              <div className={`p-2 rounded-lg ${stat.color} bg-opacity-10`}>
+                <stat.icon className={`h-5 w-5 ${stat.color.replace('bg-', 'text-')}`} />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-800 mt-2">{stat.value}</p>
+            <p className="text-sm text-gray-500">{stat.title}</p>
+          </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 card">
-          <h3 className="text-lg font-semibold mb-4">Monthly Activity</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="users" fill="#3b82f6" name="New Users" />
-                <Bar dataKey="investments" fill="#10b981" name="New Investments" />
-              </BarChart>
-            </ResponsiveContainer>
+      {/* Monthly Returns Chart (Simplified) */}
+      {monthlyReturns.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Monthly Returns</h2>
+          <div className="flex items-end gap-2 h-40">
+            {monthlyReturns.slice(-6).map((item, index) => {
+              const maxAmount = Math.max(...monthlyReturns.map((r) => r.totalAmount || 0));
+              const height = maxAmount > 0 ? (item.totalAmount / maxAmount) * 100 : 0;
+              return (
+                <div key={index} className="flex-1 flex flex-col items-center">
+                  <div className="w-full bg-blue-100 rounded-t">
+                    <div
+                      className="bg-blue-500 rounded-t transition-all duration-500"
+                      style={{ height: `${height}%`, minHeight: '4px' }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-500 mt-1">{item.month}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
+      )}
 
-        <div className="card">
-          <h3 className="text-lg font-semibold mb-4">Investment Overview</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+      {/* Recent Investments */}
+      {investments.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Investments</h2>
+          <div className="space-y-3">
+            {investments.slice(0, 5).map((inv) => (
+              <div
+                key={inv.id}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
+                <div>
+                  <p className="font-medium text-gray-800">{inv.planName}</p>
+                  <p className="text-sm text-gray-500">
+                    Invested: ₹{inv.amount.toLocaleString()}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-green-600">
+                    +₹{inv.totalProfit?.toLocaleString() || 0}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(inv.investmentDate).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
-
-      <div className="card">
-        <h3 className="text-lg font-semibold mb-4">Recent Users</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Name</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Email</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Phone</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Status</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentUsers.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="text-center py-4 text-gray-500">
-                    No users found
-                  </td>
-                </tr>
-              ) : (
-                recentUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-sm">{user.fullName}</td>
-                    <td className="py-3 px-4 text-sm">{user.email}</td>
-                    <td className="py-3 px-4 text-sm">{user.phone || 'N/A'}</td>
-                    <td className="py-3 px-4 text-sm">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          user.isActive
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
-                      >
-                        {user.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm">
-                      {new Date(user.joined).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
