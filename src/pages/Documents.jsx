@@ -3,7 +3,7 @@ import { useApi } from '../hooks/useApi';
 import { userApi } from '../api';
 import {
   DocumentTextIcon,
-  PhotoIcon,
+  PhotoIcon,IdentificationIcon,
   PaperClipIcon,
   ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
