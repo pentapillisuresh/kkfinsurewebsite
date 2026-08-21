@@ -15,7 +15,7 @@ const Documents = () => {
   const documents = data || [];
 
   const getIcon = (type) => {
-    switch (type) {
+    switch (type) { 
       case 'kyc':
         return <IdentificationIcon className="h-5 w-5" />;
       case 'agreement':
