@@ -1,18 +1,38 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks/useApi';
+import React, { useState, useEffect } from 'react';
 import { userApi } from '../api';
 
 const Returns = () => {
   const [type, setType] = useState('');
-  const { data, loading } = useApi(userApi.getReturns, { type });
+  const [returns, setReturns] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const returns = data?.returns || [];
+  useEffect(() => {
+    const fetchReturns = async () => {
+      setLoading(true);
+      try {
+        const {data} = await userApi.getReturns({ type: type || undefined });
+        if (data.success) {
+          setReturns(data.data.returns || []);
+        } else {
+          setError(data.message || 'Failed to fetch returns');
+        }
+      } catch (err) {
+        setError(err.message || 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReturns();
+  }, [type]);
 
   const getTypeLabel = (type) => {
     const labels = {
       monthly: 'Monthly',
       annual_bonus: 'Annual Bonus',
       quarterly_senior: 'Quarterly (Senior)',
+      offer: 'Offer',
     };
     return labels[type] || type;
   };
@@ -22,6 +42,7 @@ const Returns = () => {
       monthly: 'bg-green-100 text-green-700',
       annual_bonus: 'bg-purple-100 text-purple-700',
       quarterly_senior: 'bg-blue-100 text-blue-700',
+      offer: 'bg-orange-100 text-orange-700',
     };
     return colors[type] || 'bg-gray-100 text-gray-700';
   };
@@ -34,13 +55,27 @@ const Returns = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-12 bg-white rounded-xl">
+        <p className="text-red-500">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-gray-800">Returns</h1>
 
       {/* Filters */}
       <div className="flex gap-2 overflow-x-auto pb-2">
-        {['', 'monthly', 'annual_bonus', 'quarterly_senior'].map((filter) => (
+        {['', 'monthly', 'annual_bonus', 'quarterly_senior', 'offer'].map((filter) => (
           <button
             key={filter || 'all'}
             onClick={() => setType(filter)}
@@ -76,12 +111,12 @@ const Returns = () => {
                     })}
                   </p>
                   <p className="font-medium text-gray-800">
-                    {ret.investment?.plan?.name || 'Investment'}
+                    {ret.investment?.plan?.name || ret.investment?.name || 'Investment'}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-green-600">
-                    +₹{ret.amount.toLocaleString()}
+                    +₹{parseFloat(ret.amount).toLocaleString()}
                   </p>
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-1 ${getTypeColor(
