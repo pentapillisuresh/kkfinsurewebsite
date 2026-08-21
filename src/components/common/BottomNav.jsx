@@ -3,14 +3,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   HomeIcon,
   ChartBarIcon,
-  CurrencyDollarIcon,
+  CurrencyRupeeIcon,
   UserIcon,
   Bars3Icon,
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
   ChartBarIcon as ChartBarIconSolid,
-  CurrencyDollarIcon as CurrencyDollarIconSolid,
+  CurrencyRupeeIcon as CurrencyRupeeIconSolid,
   UserIcon as UserIconSolid,
 } from '@heroicons/react/24/solid';
 
@@ -21,7 +21,7 @@ const BottomNav = ({ onMenuClick }) => {
   const tabs = [
     { path: '/dashboard', label: 'Home', icon: HomeIcon, activeIcon: HomeIconSolid },
     { path: '/investments', label: 'Investments', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
-    { path: '/returns', label: 'Returns', icon: CurrencyDollarIcon, activeIcon: CurrencyDollarIconSolid },
+    { path: '/returns', label: 'Returns', icon: CurrencyRupeeIcon, activeIcon: CurrencyRupeeIconSolid },
     { path: '/profile', label: 'Profile', icon: UserIcon, activeIcon: UserIconSolid },
   ];
 

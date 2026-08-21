@@ -4,7 +4,7 @@ import {
   XMarkIcon,
   HomeIcon,
   ChartBarIcon,
-  CurrencyDollarIcon,
+  CurrencyRupeeIcon,
   UserIcon,
   DocumentTextIcon,
   GiftIcon,
@@ -21,7 +21,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
     { path: '/investments', label: 'Investments', icon: ChartBarIcon },
-    { path: '/returns', label: 'Returns', icon: CurrencyDollarIcon },
+    { path: '/returns', label: 'Returns', icon: CurrencyRupeeIcon },
     { path: '/profile', label: 'Profile', icon: UserIcon },
     { path: '/balance-sheet', label: 'Balance Sheet', icon: DocumentTextIcon },
     { path: '/documents', label: 'Documents', icon: DocumentTextIcon },
@@ -49,17 +49,23 @@ const Sidebar = ({ isOpen, onClose }) => {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-blue-600">KKFINSUREAPP</h2>
+        <div className="flex items-center flex-shrink-0">
+          <img 
+            src="/images/logo3.jpeg" 
+            alt="Logo" 
+            className="h-10 w-auto object-contain"
+          />
+        </div>
         <button
           onClick={onClose}
-          className="p-1 rounded-md hover:bg-gray-100 md:hidden"
+          className="p-1 rounded-md hover:bg-gray-100 md:hidden flex-shrink-0"
         >
           <XMarkIcon className="h-6 w-6 text-gray-600" />
         </button>
       </div>
 
       {/* Menu Items */}
-      <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+      <nav className="overflow-y-auto p-2 space-y-1">
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -81,15 +87,19 @@ const Sidebar = ({ isOpen, onClose }) => {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
+      {/* Footer - Logout at bottom with proper spacing */}
+      <div className="p-4 pt-2 border-t border-gray-200 bg-white">
         <button
           onClick={handleLogout}
-          className="flex items-center w-full px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+          className="flex items-center w-full px-4 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
         >
           <ArrowRightOnRectangleIcon className="h-5 w-5 mr-3" />
           <span className="font-medium text-sm">Logout</span>
         </button>
+        {/* Optional: Small app version */}
+        <div className="text-center mt-2">
+          <p className="text-[9px] text-gray-400">v1.0.0</p>
+        </div>
       </div>
     </div>
   );

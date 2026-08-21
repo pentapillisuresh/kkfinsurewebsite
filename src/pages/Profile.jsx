@@ -8,6 +8,14 @@ import {
   CalendarIcon,
   IdentificationIcon,
   MapPinIcon,
+  UserIcon,
+  ShieldCheckIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  PencilIcon,
+  ArrowRightIcon,
+  BuildingOfficeIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline';
 
 const Profile = () => {
@@ -17,87 +25,262 @@ const Profile = () => {
   const userData = profile || user || {};
 
   const infoItems = [
-    { label: 'Email', value: userData.email, icon: EnvelopeIcon },
-    { label: 'Phone', value: userData.phone || 'Not provided', icon: PhoneIcon },
+    { 
+      label: 'Email Address', 
+      value: userData.email, 
+      icon: EnvelopeIcon,
+      color: 'bg-blue-50 text-blue-600'
+    },
+    { 
+      label: 'Phone Number', 
+      value: userData.phone || 'Not provided', 
+      icon: PhoneIcon,
+      color: 'bg-green-50 text-green-600'
+    },
     {
       label: 'Date of Birth',
       value: userData.dateOfBirth
-        ? new Date(userData.dateOfBirth).toLocaleDateString()
+        ? new Date(userData.dateOfBirth).toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          })
         : 'Not provided',
       icon: CalendarIcon,
+      color: 'bg-purple-50 text-purple-600'
     },
-    { label: 'PAN', value: userData.pan || 'Not provided', icon: IdentificationIcon },
-    { label: 'Address', value: userData.address || 'Not provided', icon: MapPinIcon },
+    { 
+      label: 'PAN Number', 
+      value: userData.pan || 'Not provided', 
+      icon: IdentificationIcon,
+      color: 'bg-orange-50 text-orange-600'
+    },
+    { 
+      label: 'Address', 
+      value: userData.address || 'Not provided', 
+      icon: MapPinIcon,
+      color: 'bg-red-50 text-red-600'
+    },
+    { 
+      label: 'Batch ID', 
+      value: userData.batchId || 'N/A', 
+      icon: BuildingOfficeIcon,
+      color: 'bg-indigo-50 text-indigo-600'
+    },
   ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">Profile</h1>
-
-      {/* Profile Header */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-        <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold">
-            {userData.fullName?.charAt(0) || 'U'}
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-3">
+              <div className="flex-shrink-0">
+                <img 
+                  src="/images/logo3.jpeg" 
+                  alt="Logo" 
+                  className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
+                />
+              </div>
+              <p className="text-[10px] sm:hidden text-blue-200 font-medium tracking-wide text-center">
+                Wealth | Trust | Growth
+              </p>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold truncate">Profile</h1>
+              <p className="text-blue-100 text-xs sm:text-sm truncate">Manage your personal information</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold">{userData.fullName}</h2>
-            <p className="text-blue-100 text-sm">
-              {userData.role === 'admin' ? 'Administrator' : 'Investor'}
-            </p>
-            <p className="text-blue-100 text-sm">
-              Batch: {userData.batchId || 'N/A'}
-            </p>
+          <button className="flex items-center gap-2 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm hover:bg-white/20 transition-all">
+            <PencilIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="text-sm sm:text-base font-medium">Edit Profile</span>
+          </button>
+        </div>
+        <div className="hidden sm:block mt-1">
+          <p className="text-xs text-blue-200 font-medium tracking-wide">
+            Wealth | Trust | Growth
+          </p>
+        </div>
+      </div>
+
+      {/* Profile Header Card */}
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl p-5 sm:p-7 text-white shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+          <div className="relative">
+            <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-white/20 flex items-center justify-center text-3xl sm:text-4xl font-bold border-4 border-white/30 shadow-lg">
+              {userData.fullName?.charAt(0) || 'U'}
+            </div>
+            <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white">
+              <CheckCircleIcon className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl sm:text-2xl font-bold truncate">{userData.fullName || 'User'}</h2>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
+              <span className="inline-flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-xs sm:text-sm">
+                <ShieldCheckIcon className="h-3.5 w-3.5" />
+                {userData.role === 'admin' ? 'Administrator' : 'Investor'}
+              </span>
+              <span className="inline-flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-xs sm:text-sm">
+                <ClockIcon className="h-3.5 w-3.5" />
+                Batch: {userData.batchId || 'N/A'}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 mt-2 sm:mt-3">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                userData.isActive
+                  ? 'bg-green-500/30 text-white'
+                  : 'bg-red-500/30 text-white'
+              }`}>
+                <div className={`h-1.5 w-1.5 rounded-full ${
+                  userData.isActive ? 'bg-green-300' : 'bg-red-300'
+                }`} />
+                {userData.isActive ? 'Active' : 'Inactive'}
+              </span>
+              {userData.isSeniorCitizen && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-500/30 text-white">
+                  Senior Citizen
+                </span>
+              )}
+              {userData.partnerType && userData.partnerType !== 'none' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-orange-500/30 text-white">
+                  Partner: {userData.partnerType}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex-shrink-0">
+            <button className="w-full sm:w-auto bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2">
+              <span>View Details</span>
+              <ArrowRightIcon className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Info Cards */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-100">
-        {infoItems.map((item, index) => (
-          <div key={index} className="flex items-center gap-3 p-4">
-            <div className="p-2 bg-gray-50 rounded-lg">
-              <item.icon className="h-5 w-5 text-gray-500" />
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-500">{item.label}</p>
-              <p className="text-sm font-medium text-gray-800">{item.value}</p>
-            </div>
-          </div>
-        ))}
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500">Member Since</p>
+          <p className="text-sm sm:text-lg font-semibold text-gray-800">
+            {userData.createdAt ? new Date(userData.createdAt).getFullYear() : '2024'}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500">Total Investments</p>
+          <p className="text-sm sm:text-lg font-semibold text-blue-600">
+            {userData.totalInvestments || 0}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500">Total Returns</p>
+          <p className="text-sm sm:text-lg font-semibold text-green-600">
+            ₹{userData.totalReturns?.toLocaleString() || '0'}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500">Referrals</p>
+          <p className="text-sm sm:text-lg font-semibold text-purple-600">
+            {userData.referrals || 0}
+          </p>
+        </div>
       </div>
 
-      {/* Status Badges */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Account Status</h3>
-        <div className="flex flex-wrap gap-2">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
-              userData.isActive
-                ? 'bg-green-100 text-green-700'
-                : 'bg-red-100 text-red-700'
-            }`}
-          >
-            {userData.isActive ? 'Active' : 'Inactive'}
-          </span>
-          {userData.isSeniorCitizen && (
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-              Senior Citizen
+      {/* Info Cards */}
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-gray-100 bg-gray-50">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-800 flex items-center gap-2">
+            <UserIcon className="h-5 w-5 text-blue-600" />
+            Personal Information
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5">Your registered profile details</p>
+        </div>
+        <div className="divide-y divide-gray-100">
+          {infoItems.map((item, index) => (
+            <div 
+              key={index} 
+              className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-gray-50 transition-colors group"
+            >
+              <div className={`p-2 sm:p-2.5 rounded-xl ${item.color}`}>
+                <item.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">{item.label}</p>
+                <p className="text-sm sm:text-base font-medium text-gray-800 truncate">{item.value}</p>
+              </div>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className="p-1.5 hover:bg-gray-100 rounded-full">
+                  <PencilIcon className="h-3.5 w-3.5 text-gray-400" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Account Status Section */}
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-gray-100 bg-gray-50">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-800 flex items-center gap-2">
+            <ShieldCheckIcon className="h-5 w-5 text-blue-600" />
+            Account & Security
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5">Your account status and verification</p>
+        </div>
+        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-full">
+                <CheckCircleIcon className="h-4 w-4 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">Email Verification</p>
+                <p className="text-xs text-gray-500">Your email is verified</p>
+              </div>
+            </div>
+            <span className="text-xs font-medium text-green-600 bg-green-100 px-2.5 py-1 rounded-full">
+              Verified
             </span>
-          )}
-          {userData.partnerType && userData.partnerType !== 'none' && (
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
-              Partner: {userData.partnerType}
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-100 rounded-full">
+                <IdentificationIcon className="h-4 w-4 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">PAN Verification</p>
+                <p className="text-xs text-gray-500">Pending verification</p>
+              </div>
+            </div>
+            <span className="text-xs font-medium text-yellow-600 bg-yellow-100 px-2.5 py-1 rounded-full">
+              Pending
             </span>
-          )}
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-full">
+                <CreditCardIcon className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">KYC Status</p>
+                <p className="text-xs text-gray-500">Your KYC is complete</p>
+              </div>
+            </div>
+            <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2.5 py-1 rounded-full">
+              Complete
+            </span>
+          </div>
         </div>
       </div>
     </div>
