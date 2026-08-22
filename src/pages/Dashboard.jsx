@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useApi } from '../hooks/useApi';
 import { userApi } from '../api';
 import {
@@ -11,6 +11,53 @@ import {
   CheckCircleIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
+
+const getLastSixMonthsReturns = (monthlyReturns = []) => {
+  const now = new Date();
+
+  // Generate current month + previous 5 months
+  const months = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(
+      now.getFullYear(),
+      now.getMonth() - (5 - index),
+      1
+    );
+
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    return {
+      key: `${year}-${String(month + 1).padStart(2, '0')}`,
+      label: date.toLocaleDateString('en-IN', {
+        month: 'short',
+        year: 'numeric'
+      }),
+      totalAmount: 0
+    };
+  });
+
+  const monthMap = new Map(
+    months.map(month => [month.key, month])
+  );
+
+  monthlyReturns.forEach(item => {
+    if (!item.month) return;
+
+    const date = new Date(item.month);
+
+    const key = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, '0')}`;
+
+    const monthData = monthMap.get(key);
+
+    if (monthData) {
+      monthData.totalAmount += Number(item.amount || 0);
+    }
+  });
+
+  return months;
+};
 
 const Dashboard = () => {
   const { data, loading } = useApi(userApi.getDashboard);
@@ -54,6 +101,9 @@ const Dashboard = () => {
     },
   ];
 
+  const lastSixMonthsReturns =
+    getLastSixMonthsReturns(monthlyReturns);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -61,6 +111,7 @@ const Dashboard = () => {
       </div>
     );
   }
+
 
   return (
     <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
@@ -162,7 +213,47 @@ const Dashboard = () => {
                   </span>
                 </div>
               );
-            })}
+
+              return lastSixMonthsReturns.map(item => {
+                const height =
+                  maxAmount > 0
+                    ? (item.totalAmount / maxAmount) * 100
+                    : 0;
+
+                return (
+                  <div
+                    key={item.key}
+                    className="flex-1 h-full flex flex-col justify-end items-center"
+                  >
+                    {/* Amount */}
+                    <div className="mb-2 text-xs font-semibold text-gray-700">
+                      {item.totalAmount > 0
+                        ? `₹${item.totalAmount.toLocaleString('en-IN')}`
+                        : '₹0'}
+                    </div>
+
+                    {/* Bar */}
+                    <div className="w-full h-48 flex items-end">
+                      <div
+                        className="w-full bg-blue-500 hover:bg-blue-600 rounded-t-lg transition-all duration-500"
+                        style={{
+                          height:
+                            item.totalAmount > 0
+                              ? `${height}%`
+                              : '4px'
+                        }}
+                        title={`${item.label}: ₹${item.totalAmount.toLocaleString('en-IN')}`}
+                      />
+                    </div>
+
+                    {/* Month */}
+                    <span className="text-xs text-gray-500 mt-3 whitespace-nowrap">
+                      {item.label}
+                    </span>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
       )}
