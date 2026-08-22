@@ -22,6 +22,7 @@ import Points from './pages/Points';
 import Tickets from './pages/Tickets';
 import TicketDetails from './pages/TicketDetails';
 import Settings from './pages/Settings';
+import ROI from './pages/ROI';
 import { useWindowSize } from './hooks/useWindowSize';
 
 const AppContent = () => {
@@ -66,6 +67,7 @@ const AppContent = () => {
           <Route path="/documents/:id" element={<DocumentDetails />} />
           <Route path="/referrals" element={<Referrals />} />
           <Route path="/referrals/:id" element={<ReferralDetails />} />
+          <Route path="/roi" element={<ROI />} />
           <Route path="/points" element={<Points />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/tickets/:id" element={<TicketDetails />} />
