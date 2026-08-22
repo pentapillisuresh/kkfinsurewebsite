@@ -21,7 +21,9 @@ const Investments = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
-
+  
+  const summary=localStorage.getItem("InvestmentsSummery::")
+  const totalReturns=JSON.parse(summary).totalPaidReturns;
   const {
     currentPage,
     totalPages,
@@ -59,8 +61,7 @@ const Investments = () => {
     const statusMap = {
       active: { label: 'Active', icon: CheckCircleIcon, color: 'bg-green-100 text-green-800 border-green-200' },
       matured: { label: 'Matured', icon: ArrowTrendingUpIcon, color: 'bg-blue-100 text-blue-800 border-blue-200' },
-      closed: { label: 'Closed', icon: XCircleIcon, color: 'bg-gray-100 text-gray-800 border-gray-200' },
-      pending: { label: 'Pending', icon: ClockIcon, color: 'bg-yellow-100 text-yellow-800 border-yellow-200' }
+      closed: { label: 'Closed', icon: XCircleIcon, color: 'bg-gray-100 text-gray-800 border-gray-200' }
     };
     return statusMap[status] || statusMap.active;
   };
@@ -148,7 +149,7 @@ const Investments = () => {
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
           <p className="text-xs sm:text-sm text-gray-500">Returns</p>
           <p className="text-lg sm:text-2xl font-bold text-purple-600 text-truncate">
-            ₹{investments.reduce((sum, inv) => sum + parseFloat(inv.totalReturns || 0), 0).toLocaleString()}
+            ₹{totalReturns}
           </p>
         </div>
       </div>
@@ -156,7 +157,7 @@ const Investments = () => {
       {/* Filters - Mobile Responsive */}
       <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
-          {['', 'active', 'matured', 'closed', 'pending'].map((filter) => (
+          {['', 'active', 'matured', 'closed'].map((filter) => (
             <button
               key={filter || 'all'}
               onClick={() => setStatus(filter)}
@@ -212,7 +213,7 @@ const Investments = () => {
                           </span>
                         </div>
                         <p className="text-[10px] sm:text-sm text-gray-500 mt-0.5 sm:mt-1 truncate">
-                          ID: {inv.id.slice(0, 8)}...
+                          ID: {inv.InvestmentCode.slice(0, 12)}
                         </p>
                       </div>
                       <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
@@ -246,19 +247,19 @@ const Investments = () => {
                       <div>
                         <p className="text-[8px] sm:text-xs text-gray-500 flex items-center gap-0.5 sm:gap-1">
                           <ArrowTrendingUpIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                          Value
+                          Monthly Returns
                         </p>
                         <p className="font-semibold text-green-600 text-[10px] sm:text-sm truncate">
-                          ₹{parseFloat(inv.currentValue || 0).toLocaleString()}
+                          {parseFloat(inv.plan.monthlyReturnPercent || 0).toLocaleString()}%
                         </p>
                       </div>
                       <div>
                         <p className="text-[8px] sm:text-xs text-gray-500 flex items-center gap-0.5 sm:gap-1">
                           <ChartBarIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                          Returns
+                         Anuualy Returns
                         </p>
                         <p className="font-semibold text-blue-600 text-[10px] sm:text-sm truncate">
-                          ₹{parseFloat(inv.totalReturns || 0).toLocaleString()}
+                          {parseFloat(inv.plan.annualBonusPercent || 0).toLocaleString()}%
                         </p>
                       </div>
                       <div>
@@ -279,19 +280,19 @@ const Investments = () => {
                           <div>
                             <p className="text-[8px] sm:text-xs text-gray-500">Investment Date</p>
                             <p className="text-[10px] sm:text-sm font-medium text-gray-800 truncate">
-                              {new Date(inv.createdAt || inv.investmentDate).toLocaleDateString()}
+                              {new Date(inv.investmentDate).toLocaleDateString()}
                             </p>
                           </div>
                           <div>
-                            <p className="text-[8px] sm:text-xs text-gray-500">Rate of Return</p>
-                            <p className="text-[10px] sm:text-sm font-medium text-gray-800">
-                              {inv.rateOfReturn || '--'}%
+                            <p className="text-[8px] sm:text-xs text-gray-500">Investment Date</p>
+                            <p className="text-[10px] sm:text-sm font-medium text-gray-800 truncate">
+                              {new Date(inv.maturityDate).toLocaleDateString()}
                             </p>
                           </div>
                           <div className="col-span-2">
                             <p className="text-[8px] sm:text-xs text-gray-500">Payment Status</p>
-                            <p className="text-[10px] sm:text-sm font-medium text-gray-800">
-                              {inv.paymentStatus || 'Completed'}
+                            <p className="text-[10px] sm:text-sm font-medium text-green-800">
+                              {inv.status || 'Active'}
                             </p>
                           </div>
                           <div className="col-span-2">

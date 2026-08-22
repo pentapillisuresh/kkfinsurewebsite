@@ -1,17 +1,7 @@
 import React from 'react';
 import { useApi } from '../hooks/useApi';
 import { userApi } from '../api';
-import {
-  GiftIcon,
-  UserPlusIcon,
-  UsersIcon,
-  CurrencyRupeeIcon,
-  ClipboardDocumentIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  ArrowRightIcon,
-  SparklesIcon,
-} from '@heroicons/react/24/outline';
+import {GiftIcon,UserPlusIcon,UsersIcon,CurrencyRupeeIcon,ClipboardDocumentIcon,CheckCircleIcon,SparklesIcon} from '@heroicons/react/24/outline';
 
 const Referrals = () => {
   const { data, loading } = useApi(userApi.getReferrals);
@@ -119,7 +109,7 @@ const Referrals = () => {
       </div>
 
       {/* Referral Code / Link */}
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100 hover:shadow-md transition-all duration-200">
+      {/* <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100 hover:shadow-md transition-all duration-200">
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <div className="p-2 bg-blue-50 rounded-lg">
             <ClipboardDocumentIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
@@ -149,7 +139,7 @@ const Referrals = () => {
             Copy Link
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Referrals List */}
       {referrals.length === 0 ? (

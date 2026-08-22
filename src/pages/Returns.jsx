@@ -32,25 +32,27 @@ const Returns = () => {
   const [error, setError] = useState(null);
   const loaderRef = useRef(null);
   const itemsPerPage = 20;
+  const summary = localStorage.getItem("InvestmentsSummery::")
+  const totalReturns = JSON.parse(summary).totalPaidReturns;
 
   const fetchReturns = async (pageNum, resetData = false) => {
     try {
-      const {data} = await userApi.getReturns({ 
+      const { data } = await userApi.getReturns({
         type: type || undefined,
         page: pageNum,
-        limit: itemsPerPage 
+        limit: itemsPerPage
       });
-      
+
       if (data.success) {
         const newReturns = data.data.returns || [];
         const totalCount = data.data.total || 0;
-        
+
         if (resetData) {
           setReturns(newReturns);
         } else {
           setReturns(prev => [...prev, ...newReturns]);
         }
-        
+
         const currentTotal = resetData ? newReturns.length : returns.length + newReturns.length;
         setHasMore(currentTotal < totalCount && newReturns.length === itemsPerPage);
         setPage(pageNum);
@@ -102,8 +104,7 @@ const Returns = () => {
     const labels = {
       monthly: 'Monthly',
       annual_bonus: 'Annual Bonus',
-      quarterly_senior: 'Quarterly (Senior)',
-      offer: 'Offer',
+      quarterly_senior: 'Quarterly (Senior)'
     };
     return labels[type] || type;
   };
@@ -112,8 +113,7 @@ const Returns = () => {
     const colors = {
       monthly: 'bg-green-100 text-green-700 border-green-200',
       annual_bonus: 'bg-purple-100 text-purple-700 border-purple-200',
-      quarterly_senior: 'bg-blue-100 text-blue-700 border-blue-200',
-      offer: 'bg-orange-100 text-orange-700 border-orange-200',
+      quarterly_senior: 'bg-blue-100 text-blue-700 border-blue-200'
     };
     return colors[type] || 'bg-gray-100 text-gray-700 border-gray-200';
   };
@@ -122,8 +122,19 @@ const Returns = () => {
     return TYPE_ICONS[type] || TYPE_ICONS.default;
   };
 
-  const totalReturns = returns.reduce((sum, ret) => sum + parseFloat(ret.amount || 0), 0);
-  const monthlyReturns = returns.filter(r => r.type === 'monthly').reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
+  const currentMonthPaidReturns = returns
+    .filter(r => {
+      const date = new Date(r.month);
+
+      return (
+        r.type === 'monthly' &&
+        r.status === 'active' &&
+        date.getMonth() === new Date().getMonth() &&
+        date.getFullYear() === new Date().getFullYear()
+      );
+    })
+    .reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
+
   const bonusReturns = returns.filter(r => r.type === 'annual_bonus').reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
 
   if (loading && page === 1) {
@@ -159,9 +170,9 @@ const Returns = () => {
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-3">
               <div className="flex-shrink-0">
-                <img 
-                  src="/images/logo3.jpeg" 
-                  alt="Logo" 
+                <img
+                  src="/images/logo3.jpeg"
+                  alt="Logo"
                   className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
                 />
               </div>
@@ -197,15 +208,9 @@ const Returns = () => {
           </p>
         </div>
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-500">Monthly</p>
+          <p className="text-xs sm:text-sm text-gray-500">Current Month</p>
           <p className="text-lg sm:text-2xl font-bold text-blue-600">
-            ₹{monthlyReturns.toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-500">Bonus</p>
-          <p className="text-lg sm:text-2xl font-bold text-purple-600">
-            ₹{bonusReturns.toLocaleString()}
+            ₹{currentMonthPaidReturns.toLocaleString()}
           </p>
         </div>
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
@@ -219,15 +224,14 @@ const Returns = () => {
       {/* Filters */}
       <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100 sticky top-0 z-10">
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
-          {['', 'monthly', 'annual_bonus', 'quarterly_senior', 'offer'].map((filter) => (
+          {['', 'monthly', 'annual_bonus', 'quarterly_senior'].map((filter) => (
             <button
               key={filter || 'all'}
               onClick={() => setType(filter)}
-              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
-                type === filter
+              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${type === filter
                   ? 'bg-blue-600 text-white shadow-md scale-105'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105'
-              }`}
+                }`}
             >
               {filter ? getTypeLabel(filter) : 'All'}
               {filter && (
@@ -255,7 +259,7 @@ const Returns = () => {
             {returns.map((ret) => {
               const TypeIcon = getTypeIcon(ret.type);
               const typeColor = getTypeColor(ret.type);
-              
+
               return (
                 <div
                   key={ret.id}
@@ -266,7 +270,7 @@ const Returns = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
                           <h3 className="font-semibold text-gray-800 text-sm sm:text-lg truncate max-w-[150px] sm:max-w-full">
-                            {ret.investment?.plan?.name || ret.investment?.name || 'Investment'}
+                            {ret.investment?.InvestmentCode || 'Return'}
                           </h3>
                           <span
                             className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium border ${typeColor} flex-shrink-0`}
@@ -296,9 +300,10 @@ const Returns = () => {
                           +₹{parseFloat(ret.amount).toLocaleString()}
                         </p>
                         <p className="text-[10px] sm:text-xs text-gray-400">
-                          {ret.type === 'monthly' ? 'Monthly Return' : 
-                           ret.type === 'annual_bonus' ? 'Bonus' :
-                           ret.type === 'quarterly_senior' ? 'Senior Plan' : 'Offer'}
+                          {ret.type === 'monthly' ? 'Monthly Return' :
+                            ret.type === 'annual_bonus' ? 'Bonus' :
+                              ret.type === 'quarterly_senior' ? 'Senior Plan' : 'Offer'
+                          }
                         </p>
                       </div>
                     </div>
@@ -312,7 +317,7 @@ const Returns = () => {
                         </span>
                       </div>
                       <div className="w-full h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-1000"
                           style={{ width: '100%' }}
                         />

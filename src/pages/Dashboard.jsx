@@ -1,16 +1,8 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApi } from '../hooks/useApi';
 import { userApi } from '../api';
-import {
-  CurrencyRupeeIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  ArrowTrendingUpIcon,
-  CalendarIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  ArrowRightIcon,
-} from '@heroicons/react/24/outline';
+import { CurrencyRupeeIcon, ChartBarIcon, UserGroupIcon, ArrowTrendingUpIcon, CalendarIcon, ClockIcon, CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from "react-router-dom";
 
 const getLastSixMonthsReturns = (monthlyReturns = []) => {
   const now = new Date();
@@ -60,12 +52,20 @@ const getLastSixMonthsReturns = (monthlyReturns = []) => {
 };
 
 const Dashboard = () => {
+  const [userData, setUerData] = useState({})
   const { data, loading } = useApi(userApi.getDashboard);
+  const navigate = useNavigate();
 
   const stats = data?.summary || {};
+  localStorage.setItem("InvestmentsSummery::",JSON.stringify(stats))
   const investments = data?.investments || [];
   const monthlyReturns = data?.monthlyReturns || [];
 
+  useEffect(() => {
+    const userDetails = localStorage.getItem("user");
+    console.log("userDetails:::", JSON.parse(userDetails).fullName)
+    setUerData(JSON.parse(userDetails))
+  }, [])
   const statCards = [
     {
       title: 'Total Invested',
@@ -92,7 +92,7 @@ const Dashboard = () => {
       textColor: 'text-purple-600',
     },
     {
-      title: 'Total Profit',
+      title: 'Total Payout',
       value: `₹${(stats.totalProfit || 0).toLocaleString()}`,
       icon: UserGroupIcon,
       color: 'from-orange-500 to-orange-600',
@@ -121,9 +121,9 @@ const Dashboard = () => {
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-3">
               <div className="flex-shrink-0">
-                <img 
-                  src="/images/logo3.jpeg" 
-                  alt="Logo" 
+                <img
+                  src="/images/logo3.jpeg"
+                  alt="Logo"
                   className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
                 />
               </div>
@@ -133,16 +133,16 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold truncate">Dashboard</h1>
+              <h1 className="text-lg sm:text-2xl font-bold truncate">Welcome {userData.fullName}</h1>
               <p className="text-blue-100 text-xs sm:text-sm truncate">Overview of your investment portfolio</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm">
+          {/* <div className="flex items-center gap-2 sm:gap-3 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm">
             <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
             <span className="font-semibold text-sm sm:text-base truncate">
-              {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              {new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
             </span>
-          </div>
+          </div> */}
         </div>
         {/* Tagline for desktop */}
         <div className="hidden sm:block mt-1">
@@ -170,7 +170,7 @@ const Dashboard = () => {
             <p className="text-lg sm:text-2xl font-bold text-gray-800 mt-2 sm:mt-3 truncate">{stat.value}</p>
             <p className="text-[10px] sm:text-sm text-gray-500 mt-0.5 sm:mt-1">{stat.title}</p>
             <div className="mt-2 sm:mt-3 w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-              <div 
+              <div
                 className={`h-full bg-gradient-to-r ${stat.color} rounded-full transition-all duration-1000`}
                 style={{ width: `${Math.random() * 40 + 60}%` }}
               />
@@ -181,84 +181,84 @@ const Dashboard = () => {
 
       {/* Monthly Returns Chart */}
       {lastSixMonthsReturns.length > 0 && (
-  <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-    <div className="flex items-center justify-between mb-6">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-800">
-          Monthly Returns
-        </h2>
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">
+                Monthly Returns
+              </h2>
 
-        <p className="text-sm text-gray-500 mt-1">
-          Last 6 months
-        </p>
-      </div>
-
-      <div className="text-right">
-        <p className="text-xs text-gray-500">
-          6 Month Total
-        </p>
-
-        <p className="text-lg font-bold text-blue-600">
-          ₹
-          {lastSixMonthsReturns
-            .reduce((sum, item) => sum + item.totalAmount, 0)
-            .toLocaleString('en-IN')}
-        </p>
-      </div>
-    </div>
-
-    <div className="flex items-end gap-3 h-64">
-      {(() => {
-        const maxAmount = Math.max(
-          ...lastSixMonthsReturns.map(
-            item => item.totalAmount
-          ),
-          0
-        );
-
-        return lastSixMonthsReturns.map(item => {
-          const height =
-            maxAmount > 0
-              ? (item.totalAmount / maxAmount) * 100
-              : 0;
-
-          return (
-            <div
-              key={item.key}
-              className="flex-1 h-full flex flex-col justify-end items-center"
-            >
-              {/* Amount */}
-              <div className="mb-2 text-xs font-semibold text-gray-700">
-                {item.totalAmount > 0
-                  ? `₹${item.totalAmount.toLocaleString('en-IN')}`
-                  : '₹0'}
-              </div>
-
-              {/* Bar */}
-              <div className="w-full h-48 flex items-end">
-                <div
-                  className="w-full bg-blue-500 hover:bg-blue-600 rounded-t-lg transition-all duration-500"
-                  style={{
-                    height:
-                      item.totalAmount > 0
-                        ? `${height}%`
-                        : '4px'
-                  }}
-                  title={`${item.label}: ₹${item.totalAmount.toLocaleString('en-IN')}`}
-                />
-              </div>
-
-              {/* Month */}
-              <span className="text-xs text-gray-500 mt-3 whitespace-nowrap">
-                {item.label}
-              </span>
+              <p className="text-sm text-gray-500 mt-1">
+                Last 6 months
+              </p>
             </div>
-          );
-        });
-      })()}
-    </div>
-  </div>
-)}
+
+            <div className="text-right">
+              <p className="text-xs text-gray-500">
+                6 Month Total
+              </p>
+
+              <p className="text-lg font-bold text-blue-600">
+                ₹
+                {lastSixMonthsReturns
+                  .reduce((sum, item) => sum + item.totalAmount, 0)
+                  .toLocaleString('en-IN')}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-end gap-3 h-64">
+            {(() => {
+              const maxAmount = Math.max(
+                ...lastSixMonthsReturns.map(
+                  item => item.totalAmount
+                ),
+                0
+              );
+
+              return lastSixMonthsReturns.map(item => {
+                const height =
+                  maxAmount > 0
+                    ? (item.totalAmount / maxAmount) * 100
+                    : 0;
+
+                return (
+                  <div
+                    key={item.key}
+                    className="flex-1 h-full flex flex-col justify-end items-center"
+                  >
+                    {/* Amount */}
+                    <div className="mb-2 text-xs font-semibold text-gray-700">
+                      {item.totalAmount > 0
+                        ? `₹${item.totalAmount.toLocaleString('en-IN')}`
+                        : '₹0'}
+                    </div>
+
+                    {/* Bar */}
+                    <div className="w-full h-48 flex items-end">
+                      <div
+                        className="w-full bg-blue-500 hover:bg-blue-600 rounded-t-lg transition-all duration-500"
+                        style={{
+                          height:
+                            item.totalAmount > 0
+                              ? `${height}%`
+                              : '4px'
+                        }}
+                        title={`${item.label}: ₹${item.totalAmount.toLocaleString('en-IN')}`}
+                      />
+                    </div>
+
+                    {/* Month */}
+                    <span className="text-xs text-gray-500 mt-3 whitespace-nowrap">
+                      {item.label}
+                    </span>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Recent Investments & Quick Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -270,7 +270,10 @@ const Dashboard = () => {
                 <h2 className="text-base sm:text-lg font-semibold text-gray-800">Recent Investments</h2>
                 <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Your latest investment activities</p>
               </div>
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-blue-600 font-medium">
+              <div
+                className="flex items-center gap-2 text-xs sm:text-sm text-blue-600 font-medium cursor-pointer"
+                onClick={() => navigate("/investments")}
+              >
                 <span>View All</span>
                 <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />
               </div>
@@ -282,12 +285,10 @@ const Dashboard = () => {
                   className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 group"
                 >
                   <div className="flex items-center gap-3 sm:gap-4">
-                    <div className={`p-2 rounded-lg ${
-                      index % 2 === 0 ? 'bg-blue-100' : 'bg-green-100'
-                    }`}>
-                      <ChartBarIcon className={`h-4 w-4 sm:h-5 sm:w-5 ${
-                        index % 2 === 0 ? 'text-blue-600' : 'text-green-600'
-                      }`} />
+                    <div className={`p-2 rounded-lg ${index % 2 === 0 ? 'bg-blue-100' : 'bg-green-100'
+                      }`}>
+                      <ChartBarIcon className={`h-4 w-4 sm:h-5 sm:w-5 ${index % 2 === 0 ? 'text-blue-600' : 'text-green-600'
+                        }`} />
                     </div>
                     <div>
                       <p className="font-medium text-gray-800 text-sm sm:text-base">{inv.planName}</p>

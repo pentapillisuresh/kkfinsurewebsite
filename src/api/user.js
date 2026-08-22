@@ -19,6 +19,7 @@ export const userApi = {
   getReturnDetails: (id) => api.get(`/users/returns/${id}`),
 
   // Balance Sheets
+  generateBalanceSheet: (data) => api.post('/balance-sheets/my/generate', data),
   getBalanceSheets: (params) => api.get('/users/balance-sheet', { params }),
   getBalanceSheetDetails: (id) => api.get(`/users/balance-sheet/${id}`),
 

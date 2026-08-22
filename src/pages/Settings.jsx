@@ -86,49 +86,11 @@ const Settings = () => {
               <p className="text-blue-100 text-xs sm:text-sm truncate">Manage your account preferences</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm">
-            <Cog6ToothIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-            <span className="font-semibold text-sm sm:text-base truncate">
-              Account Settings
-            </span>
-          </div>
         </div>
         <div className="hidden sm:block mt-1">
           <p className="text-xs text-blue-200 font-medium tracking-wide">
             Wealth | Trust | Growth
           </p>
-        </div>
-      </div>
-
-      {/* Settings Options Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-blue-100 hover:shadow-md transition-all duration-200 cursor-pointer">
-          <div className="p-2 sm:p-2.5 bg-blue-50 rounded-xl inline-block">
-            <ShieldCheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-          </div>
-          <p className="text-xs sm:text-sm font-medium text-gray-800 mt-2">Security</p>
-          <p className="text-[8px] sm:text-xs text-gray-400">Password & 2FA</p>
-        </div>
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer">
-          <div className="p-2 sm:p-2.5 bg-purple-50 rounded-xl inline-block">
-            <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
-          </div>
-          <p className="text-xs sm:text-sm font-medium text-gray-800 mt-2">Profile</p>
-          <p className="text-[8px] sm:text-xs text-gray-400">Personal info</p>
-        </div>
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer">
-          <div className="p-2 sm:p-2.5 bg-green-50 rounded-xl inline-block">
-            <BellIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-          </div>
-          <p className="text-xs sm:text-sm font-medium text-gray-800 mt-2">Notifications</p>
-          <p className="text-[8px] sm:text-xs text-gray-400">Alert preferences</p>
-        </div>
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer">
-          <div className="p-2 sm:p-2.5 bg-orange-50 rounded-xl inline-block">
-            <Cog6ToothIcon className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
-          </div>
-          <p className="text-xs sm:text-sm font-medium text-gray-800 mt-2">Preferences</p>
-          <p className="text-[8px] sm:text-xs text-gray-400">App settings</p>
         </div>
       </div>
 

@@ -1,0 +1,396 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  .balance-page {
+    min-height: 100vh;
+    background: #f5f7fa;
+    color: #1a2332;
+  }
+  
+  /* Header */
+  
+  .balance-header {
+    height: 210px;
+    background: #2b46d5;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    padding: 25px 30px;
+    color: white;
+  }
+  
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  
+  .back-button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+  }
+  
+  .logo-container {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .header-logo {
+    width: 120px;
+    height: 50px;
+    object-fit: contain;
+  }
+  
+  .tagline {
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    opacity: 0.9;
+  }
+  
+  .header-spacer {
+    width: 40px;
+  }
+  
+  .header-title {
+    margin-top: 15px;
+  }
+  
+  .header-title h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+  }
+  
+  .header-title p {
+    margin-top: 5px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+  }
+  
+  /* Main */
+  
+  .balance-content {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+  
+  .subtitle {
+    color: #6b7a8f;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .form-group {
+    flex: 1;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  
+  .form-group select {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #e8ecf0;
+    border-radius: 10px;
+    background: white;
+    color: #1a2332;
+    font-size: 15px;
+    outline: none;
+    cursor: pointer;
+  }
+  
+  .form-group select:focus {
+    border-color: #2b46d5;
+  }
+  
+  .generate-button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    background: #2b46d5;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  
+  .generate-button:hover {
+    background: #2139b8;
+  }
+  
+  .generate-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Modal */
+  
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+  
+    background: rgba(0, 0, 0, 0.5);
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    padding: 20px;
+  }
+  
+  .result-modal {
+    width: 100%;
+    max-width: 1000px;
+    max-height: 90vh;
+  
+    background: #f5f7fa;
+    border-radius: 16px;
+  
+    overflow: hidden;
+  
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    padding: 16px 20px;
+  
+    background: white;
+    border-bottom: 1px solid #e8ecf0;
+  }
+  
+  .modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+  
+  .close-button {
+    border: none;
+    background: transparent;
+    color: #333;
+    font-size: 28px;
+    cursor: pointer;
+  }
+  
+  .modal-body {
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  /* Download */
+  
+  .download-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .download-button {
+    flex: 1;
+  
+    border: none;
+    border-radius: 12px;
+  
+    padding: 14px;
+  
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+  
+    cursor: pointer;
+  }
+  
+  .download-button.pdf {
+    background: #2b46d5;
+  }
+  
+  .download-button.excel {
+    background: #0f9d58;
+  }
+  
+  .download-button.csv {
+    background: #f39c12;
+  }
+  
+  .download-button:hover {
+    opacity: 0.9;
+  }
+  
+  /* Summary */
+  
+  .summary-card {
+    background: #f0f4ff;
+    border: 1px solid #e8ecf0;
+    border-radius: 12px;
+  
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .summary-period {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  
+  .summary-grid div {
+    font-size: 13px;
+  }
+  
+  .summary-grid strong {
+    margin-left: 5px;
+  }
+  
+  /* Transactions */
+  
+  .transactions-title {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .transaction-table {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .table-header,
+  .transaction-row {
+    min-width: 600px;
+  
+    display: grid;
+  
+    grid-template-columns:
+      1.2fr
+      0.8fr
+      1fr
+      1fr
+      1.2fr;
+  
+    align-items: center;
+  }
+  
+  .table-header {
+    background: #e8ecf0;
+    padding: 10px 8px;
+  
+    border-radius: 6px;
+  
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .transaction-row {
+    padding: 9px 8px;
+  
+    border-bottom: 1px solid #e8ecf0;
+  
+    font-size: 12px;
+  }
+  
+  .tx-date {
+    color: #1a2332;
+  }
+  
+  .tx-roi {
+    color: #1a2332;
+  }
+  
+  .tx-amount {
+    text-align: right;
+    font-weight: bold;
+  }
+  
+  .tx-balance {
+    text-align: right;
+  }
+  
+  .positive {
+    color: #7cb80b;
+  }
+  
+  .negative {
+    color: #e03333;
+  }
+  
+  .empty {
+    padding: 30px;
+    text-align: center;
+    color: #6b7a8f;
+  }
+  
+  /* Responsive */
+  
+  @media (max-width: 600px) {
+    .balance-header {
+      height: 200px;
+      padding: 20px 15px;
+    }
+  
+    .balance-content {
+      padding: 25px 15px;
+    }
+  
+    .form-row {
+      gap: 8px;
+    }
+  
+    .download-row {
+      gap: 7px;
+    }
+  
+    .download-button {
+      padding: 12px 5px;
+      font-size: 13px;
+    }
+  
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .modal-overlay {
+      padding: 0;
+    }
+  
+    .result-modal {
+      max-height: 100vh;
+      height: 100vh;
+      border-radius: 0;
+    }
+  
+    .modal-body {
+      padding: 15px;
+    }
+  }
+  
