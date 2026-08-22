@@ -261,7 +261,7 @@ const Dashboard = () => {
 )}
 
       {/* Recent Investments & Quick Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Recent Investments */}
         {investments.length > 0 && (
           <div className="lg:col-span-2 bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100 hover:shadow-md transition-all duration-200">
@@ -312,53 +312,6 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Quick Stats Sidebar */}
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100 hover:shadow-md transition-all duration-200">
-          <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 sm:mb-6">Quick Stats</h2>
-          <div className="space-y-4 sm:space-y-6">
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-                <span className="text-sm sm:text-base text-gray-700">Active Plans</span>
-              </div>
-              <span className="font-bold text-blue-600 text-sm sm:text-lg">
-                {stats.activeInvestments || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <ArrowTrendingUpIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                <span className="text-sm sm:text-base text-gray-700">Matured Plans</span>
-              </div>
-              <span className="font-bold text-green-600 text-sm sm:text-lg">
-                {stats.maturedInvestments || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <CurrencyRupeeIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
-                <span className="text-sm sm:text-base text-gray-700">Avg. Return</span>
-              </div>
-              <span className="font-bold text-purple-600 text-sm sm:text-lg">
-                {stats.averageReturn || '--'}%
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
-                <span className="text-sm sm:text-base text-gray-700">Referrals</span>
-              </div>
-              <span className="font-bold text-orange-600 text-sm sm:text-lg">
-                {stats.referrals || 0}
-              </span>
-            </div>
-          </div>
-          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
-            <button className="w-full py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:shadow-lg transition-all hover:scale-105 text-sm sm:text-base">
-              View Full Report
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
