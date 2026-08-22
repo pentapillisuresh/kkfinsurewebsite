@@ -180,83 +180,85 @@ const Dashboard = () => {
       </div>
 
       {/* Monthly Returns Chart */}
-      {monthlyReturns.length > 0 && (
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100 hover:shadow-md transition-all duration-200">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <div>
-              <h2 className="text-base sm:text-lg font-semibold text-gray-800">Monthly Returns</h2>
-              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Last 6 months performance</p>
+      {lastSixMonthsReturns.length > 0 && (
+  <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-800">
+          Monthly Returns
+        </h2>
+
+        <p className="text-sm text-gray-500 mt-1">
+          Last 6 months
+        </p>
+      </div>
+
+      <div className="text-right">
+        <p className="text-xs text-gray-500">
+          6 Month Total
+        </p>
+
+        <p className="text-lg font-bold text-blue-600">
+          ₹
+          {lastSixMonthsReturns
+            .reduce((sum, item) => sum + item.totalAmount, 0)
+            .toLocaleString('en-IN')}
+        </p>
+      </div>
+    </div>
+
+    <div className="flex items-end gap-3 h-64">
+      {(() => {
+        const maxAmount = Math.max(
+          ...lastSixMonthsReturns.map(
+            item => item.totalAmount
+          ),
+          0
+        );
+
+        return lastSixMonthsReturns.map(item => {
+          const height =
+            maxAmount > 0
+              ? (item.totalAmount / maxAmount) * 100
+              : 0;
+
+          return (
+            <div
+              key={item.key}
+              className="flex-1 h-full flex flex-col justify-end items-center"
+            >
+              {/* Amount */}
+              <div className="mb-2 text-xs font-semibold text-gray-700">
+                {item.totalAmount > 0
+                  ? `₹${item.totalAmount.toLocaleString('en-IN')}`
+                  : '₹0'}
+              </div>
+
+              {/* Bar */}
+              <div className="w-full h-48 flex items-end">
+                <div
+                  className="w-full bg-blue-500 hover:bg-blue-600 rounded-t-lg transition-all duration-500"
+                  style={{
+                    height:
+                      item.totalAmount > 0
+                        ? `${height}%`
+                        : '4px'
+                  }}
+                  title={`${item.label}: ₹${item.totalAmount.toLocaleString('en-IN')}`}
+                />
+              </div>
+
+              {/* Month */}
+              <span className="text-xs text-gray-500 mt-3 whitespace-nowrap">
+                {item.label}
+              </span>
             </div>
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-blue-600 font-medium">
-              <span>View All</span>
-              <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-            </div>
-          </div>
-          <div className="flex items-end gap-1 sm:gap-3 h-40 sm:h-56">
-            {monthlyReturns.slice(-6).map((item, index) => {
-              const maxAmount = Math.max(...monthlyReturns.map((r) => r.totalAmount || 0));
-              const height = maxAmount > 0 ? (item.totalAmount / maxAmount) * 100 : 0;
-              return (
-                <div key={index} className="flex-1 flex flex-col items-center">
-                  <div className="w-full relative group">
-                    <div
-                      className="bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg transition-all duration-700 hover:from-blue-600 hover:to-blue-500 cursor-pointer"
-                      style={{ height: `${Math.max(height, 5)}%`, minHeight: '20px' }}
-                    >
-                      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                        ₹{item.totalAmount?.toLocaleString() || 0}
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-[8px] sm:text-xs text-gray-500 mt-1 sm:mt-2 font-medium">
-                    {item.month}
-                  </span>
-                </div>
-              );
-
-              return lastSixMonthsReturns.map(item => {
-                const height =
-                  maxAmount > 0
-                    ? (item.totalAmount / maxAmount) * 100
-                    : 0;
-
-                return (
-                  <div
-                    key={item.key}
-                    className="flex-1 h-full flex flex-col justify-end items-center"
-                  >
-                    {/* Amount */}
-                    <div className="mb-2 text-xs font-semibold text-gray-700">
-                      {item.totalAmount > 0
-                        ? `₹${item.totalAmount.toLocaleString('en-IN')}`
-                        : '₹0'}
-                    </div>
-
-                    {/* Bar */}
-                    <div className="w-full h-48 flex items-end">
-                      <div
-                        className="w-full bg-blue-500 hover:bg-blue-600 rounded-t-lg transition-all duration-500"
-                        style={{
-                          height:
-                            item.totalAmount > 0
-                              ? `${height}%`
-                              : '4px'
-                        }}
-                        title={`${item.label}: ₹${item.totalAmount.toLocaleString('en-IN')}`}
-                      />
-                    </div>
-
-                    {/* Month */}
-                    <span className="text-xs text-gray-500 mt-3 whitespace-nowrap">
-                      {item.label}
-                    </span>
-                  </div>
-                );
-              });
-            })()}
-          </div>
-        </div>
-      )}
+          );
+        });
+      })()}
+    </div>
+  </div>
+)}
 
       {/* Recent Investments & Quick Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
