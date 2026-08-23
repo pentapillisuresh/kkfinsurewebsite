@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 import * as XLSX from "xlsx";
 import { useApi } from '../hooks/useApi';
 import { userApi } from '../api';
@@ -682,8 +683,8 @@ const BalanceSheet = () => {
 
             <div class="logo">
               ${
-                "/assets/images/logo3.jpeg"
-                  ? `<img src="/assets/images/logo3.jpeg" />`
+                "/images/logo3.jpeg"
+                  ? `<img src="./images/logo3.jpeg" />`
                   : ""
               }
 
@@ -912,53 +913,42 @@ const BalanceSheet = () => {
   return (
     <div className="balance-page">
 
-      {/* Header */}
-
-      <header className="balance-header">
-
-        <div className="header-top">
-
-          <button
-            className="back-button"
-            onClick={() =>
-              navigate(-1)
-            }
-          >
-            ←
-          </button>
-
-          <div className="logo-container">
-
-            <img
-              src="/assets/images/logo3.jpeg"
-              alt="KKFinsure"
-              className="header-logo"
-            />
-
-            <div className="tagline">
-              Wealth | Trust | Growth
-            </div>
-
-          </div>
-
-          <div className="header-spacer" />
-
+  
+{/* Header with Logo */}
+{/* Header with Logo */}
+<div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+    <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-3">
+        <div className="flex-shrink-0">
+          <img 
+            src="/images/logo3.jpeg" 
+            alt="Logo" 
+            className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
+          />
         </div>
-
-        <div className="header-title">
-
-          <h1>
-            Balance Sheet
-          </h1>
-
-          <p>
-            Generate and manage your
-            statements
-          </p>
-
-        </div>
-
-      </header>
+        <p className="text-[10px] sm:hidden text-blue-200 font-medium tracking-wide text-center">
+          Wealth | Trust | Growth
+        </p>
+      </div>
+      <div className="flex-1 min-w-0">
+        <h1 className="text-lg sm:text-2xl font-bold truncate">Balance Sheet</h1>
+        <p className="text-blue-100 text-xs sm:text-sm truncate">Generate and manage your statements</p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2 sm:gap-3 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm">
+      <DocumentTextIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+      <span className="font-semibold text-sm sm:text-base truncate">
+        Statement
+      </span>
+    </div>
+  </div>
+  <div className="hidden sm:block mt-1">
+    <p className="text-xs text-blue-200 font-medium tracking-wide">
+      Wealth | Trust | Growth
+    </p>
+  </div>
+</div>
 
       {/* Main */}
 
