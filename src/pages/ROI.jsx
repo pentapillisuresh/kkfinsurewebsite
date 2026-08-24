@@ -608,7 +608,7 @@ const ROI = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
+        {/* <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
           <p className="text-xs sm:text-sm text-gray-500">
             Pending ROI
           </p>
@@ -616,7 +616,7 @@ const ROI = () => {
           <p className="text-2xl sm:text-3xl font-bold text-yellow-600 mt-1">
             {formatCurrency(pendingReturns)}
           </p>
-        </div>
+        </div> */}
 
       </div>
 

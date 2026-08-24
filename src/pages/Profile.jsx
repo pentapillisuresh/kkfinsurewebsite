@@ -2,31 +2,13 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useApi } from '../hooks/useApi';
 import { userApi } from '../api';
-import {
-  EnvelopeIcon,
-  PhoneIcon,
-  CalendarIcon,
-  IdentificationIcon,
-  MapPinIcon,
-  UserIcon,
-  ShieldCheckIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  PencilIcon,
-  BuildingOfficeIcon,
-  CreditCardIcon,
-  UserPlusIcon,
-  BanknotesIcon,
-  DocumentTextIcon,
-  FolderIcon,
-  ArrowDownTrayIcon,
-  EyeIcon,
-} from '@heroicons/react/24/outline';
+import {EnvelopeIcon,PhoneIcon,CalendarIcon,IdentificationIcon,MapPinIcon,UserIcon,ShieldCheckIcon,CheckCircleIcon,ClockIcon,PencilIcon,BuildingOfficeIcon,CreditCardIcon,UserPlusIcon,BanknotesIcon,DocumentTextIcon,FolderIcon,ArrowDownTrayIcon,EyeIcon} from '@heroicons/react/24/outline';
 
 const Profile = () => {
   const { user } = useAuth();
   const { data: profile, loading } = useApi(userApi.getProfile);
-const baseURL="http://localhost:3000"
+// const baseURL="http://localhost:3000"
+const baseURL="https://service.kkfinsure.org"
   const userData = profile || user || {};
 
   const infoItems = [
