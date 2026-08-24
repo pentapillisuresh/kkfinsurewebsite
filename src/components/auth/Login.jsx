@@ -34,8 +34,20 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <img src="/images/logo3.jpeg" alt="Logo" className="mx-auto h-16 w-auto mb-4" />
-          <p className="text-gray-500 mt-2">Welcome back! Please login to your account.</p>
+          {/* Logo */}
+          <img src="/images/logo3.jpeg" alt="Logo" className="mx-auto h-16 w-auto mb-2" />
+          
+          {/* Text Below Logo */}
+          <div className="flex flex-col items-center">
+            <p className="text-sm font-semibold text-gray-800">
+              Asset - Wealth Management
+            </p>
+            <p className="text-xs text-gray-500">
+              Wealth | Trust | Growth
+            </p>
+          </div>
+          
+          <p className="text-gray-500 mt-4">Welcome back! Please login to your account.</p>
         </div>
 
         {error && (
