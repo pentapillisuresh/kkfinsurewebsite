@@ -494,7 +494,7 @@ const BalanceSheet = () => {
               </td>
 
               <td style="text-align:right">
-                ₹${t.balance || 0}
+               ₹${Math.abs(Number(t.balance || 0))}
               </td>
             </tr>
           `;
@@ -904,7 +904,7 @@ const BalanceSheet = () => {
         </div>
 
         <div className="tx-balance">
-          ₹{item.balance ?? 0}
+         ₹{Math.abs(Number(item.balance ?? 0))}
         </div>
       </div>
     );
