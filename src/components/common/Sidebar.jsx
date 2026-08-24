@@ -11,7 +11,7 @@ import {
   SparklesIcon,
   TicketIcon,
   Cog6ToothIcon,
-   ArrowTrendingUpIcon,
+  ArrowTrendingUpIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 
@@ -23,7 +23,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
     { path: '/investments', label: 'Investments', icon: ChartBarIcon },
     { path: '/returns', label: 'Returns', icon: CurrencyRupeeIcon },
-      { path: '/roi', label: 'ROI & Returns', icon: ArrowTrendingUpIcon },
+    { path: '/roi', label: 'ROI & Returns', icon: ArrowTrendingUpIcon },
     { path: '/profile', label: 'Profile', icon: UserIcon },
     { path: '/balance-sheet', label: 'Balance Sheet', icon: DocumentTextIcon },
     { path: '/documents', label: 'Documents', icon: DocumentTextIcon },
@@ -50,24 +50,28 @@ const Sidebar = ({ isOpen, onClose }) => {
   const sidebarContent = (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <div className="flex items-center flex-shrink-0">
+      <div className="flex flex-col p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
           <img 
             src="/images/logo3.jpeg" 
             alt="Logo" 
-            className="h-10 w-auto object-contain"
+            className="h-12 w-auto object-contain mx-auto"
           />
+          <button
+            onClick={onClose}
+            className="p-1 rounded-md hover:bg-gray-100 md:hidden flex-shrink-0"
+          >
+            <XMarkIcon className="h-6 w-6 text-gray-600" />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 rounded-md hover:bg-gray-100 md:hidden flex-shrink-0"
-        >
-          <XMarkIcon className="h-6 w-6 text-gray-600" />
-        </button>
+        <div className="mt-2 text-center">
+          <span className="text-sm font-semibold text-gray-800 block">Asset - Wealth Management</span>
+          <span className="text-xs text-gray-500 block">Wealth || Trust || Growth</span>
+        </div>
       </div>
 
       {/* Menu Items */}
-      <nav className="overflow-y-auto p-2 space-y-1">
+      <nav className="overflow-y-auto p-2 space-y-1 flex-1">
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -80,7 +84,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
-              <item.icon className={`h-5 w-5 mr-3 ${
+              <item.icon className={`h-5 w-5 mr-3 flex-shrink-0 ${
                 isActive ? 'text-blue-600' : 'text-gray-500'
               }`} />
               <span className="font-medium text-sm">{item.label}</span>
@@ -95,10 +99,9 @@ const Sidebar = ({ isOpen, onClose }) => {
           onClick={handleLogout}
           className="flex items-center w-full px-4 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
         >
-          <ArrowRightOnRectangleIcon className="h-5 w-5 mr-3" />
+          <ArrowRightOnRectangleIcon className="h-5 w-5 mr-3 flex-shrink-0" />
           <span className="font-medium text-sm">Logout</span>
         </button>
-        {/* Optional: Small app version */}
         <div className="text-center mt-2">
           <p className="text-[9px] text-gray-400">v1.0.0</p>
         </div>
@@ -107,17 +110,14 @@ const Sidebar = ({ isOpen, onClose }) => {
   );
 
   // Desktop sidebar - always visible
-  if (window.innerWidth >= 768) {
-    return (
+  return (
+    <>
+      {/* Desktop */}
       <div className="hidden md:block md:w-64 md:flex-shrink-0 h-screen sticky top-0 border-r border-gray-200 bg-white overflow-y-auto">
         {sidebarContent}
       </div>
-    );
-  }
 
-  // Mobile sidebar - overlay
-  return (
-    <>
+      {/* Mobile - Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 z-50 bg-black bg-opacity-50 md:hidden"

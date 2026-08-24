@@ -65,34 +65,39 @@ const Settings = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 px-3 sm:px-0 pb-20">
-      {/* Header with Logo */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-3">
-              <div className="flex-shrink-0">
-                <img 
-                  src="/images/logo3.jpeg" 
-                  alt="Logo" 
-                  className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
-                />
-              </div>
-              <p className="text-[10px] sm:hidden text-blue-200 font-medium tracking-wide text-center">
-                Wealth | Trust | Growth
-              </p>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold truncate">Settings</h1>
-              <p className="text-blue-100 text-xs sm:text-sm truncate">Manage your account preferences</p>
-            </div>
-          </div>
+    {/* Header with Logo */}
+<div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+    {/* Left Section: Logo + Text Below */}
+    <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex flex-col items-center">
+        {/* Logo */}
+        <div className="flex-shrink-0">
+          <img 
+            src="/images/logo3.jpeg" 
+            alt="Logo" 
+            className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
+          />
         </div>
-        <div className="hidden sm:block mt-1">
-          <p className="text-xs text-blue-200 font-medium tracking-wide">
+        {/* Text Below Logo - On all devices */}
+        <div className="flex flex-col items-center mt-1">
+          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
+            Asset - Wealth Management
+          </p>
+          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
             Wealth | Trust | Growth
           </p>
         </div>
       </div>
+    </div>
+
+    {/* Right Section: Settings */}
+    <div className="flex-1 min-w-0 text-center sm:text-right">
+      <h1 className="text-lg sm:text-2xl font-bold truncate">Settings</h1>
+      <p className="text-blue-100 text-xs sm:text-sm truncate">Manage your account preferences</p>
+    </div>
+  </div>
+</div>
 
       {/* Change Password */}
       <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200">

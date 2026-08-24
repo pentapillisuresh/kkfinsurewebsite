@@ -112,46 +112,42 @@ const Dashboard = () => {
     );
   }
 
-
   return (
     <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
       {/* Header with Logo */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-3">
-              <div className="flex-shrink-0">
-                <img
-                  src="/images/logo3.jpeg"
-                  alt="Logo"
-                  className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
-                />
-              </div>
-              {/* Tagline below logo on mobile */}
-              <p className="text-[10px] sm:hidden text-blue-200 font-medium tracking-wide text-center">
-                Wealth | Trust | Growth
-              </p>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold truncate">Welcome {userData.fullName}</h1>
-              <p className="text-blue-100 text-xs sm:text-sm truncate">Overview of your investment portfolio</p>
-            </div>
-          </div>
-          {/* <div className="flex items-center gap-2 sm:gap-3 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm">
-            <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-            <span className="font-semibold text-sm sm:text-base truncate">
-              {new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
-            </span>
-          </div> */}
+   <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+    {/* Left Section: Logo + Text Below */}
+    <div className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-4">
+      {/* Logo and Text Container */}
+      <div className="flex flex-col items-center">
+        {/* Logo */}
+        <div className="flex-shrink-0">
+          <img
+            src="/images/logo3.jpeg"
+            alt="Logo"
+            className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
+          />
         </div>
-        {/* Tagline for desktop */}
-        <div className="hidden sm:block mt-1">
-          <p className="text-xs text-blue-200 font-medium tracking-wide">
+        {/* Text Below Logo - On all devices */}
+        <div className="flex flex-col items-center mt-1">
+          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
+            Asset - Wealth Management
+          </p>
+          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
             Wealth | Trust | Growth
           </p>
         </div>
       </div>
+    </div>
 
+    {/* Right Section: Welcome Text */}
+    <div className="flex-1 min-w-0 text-center sm:text-right">
+      <h1 className="text-lg sm:text-2xl font-bold truncate">Welcome {userData.fullName}</h1>
+      <p className="text-blue-100 text-xs sm:text-sm truncate">Overview of your investment portfolio</p>
+    </div>
+  </div>
+</div>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         {statCards.map((stat, index) => (
@@ -285,10 +281,8 @@ const Dashboard = () => {
                   className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 group"
                 >
                   <div className="flex items-center gap-3 sm:gap-4">
-                    <div className={`p-2 rounded-lg ${index % 2 === 0 ? 'bg-blue-100' : 'bg-green-100'
-                      }`}>
-                      <ChartBarIcon className={`h-4 w-4 sm:h-5 sm:w-5 ${index % 2 === 0 ? 'text-blue-600' : 'text-green-600'
-                        }`} />
+                    <div className={`p-2 rounded-lg ${index % 2 === 0 ? 'bg-blue-100' : 'bg-green-100'}`}>
+                      <ChartBarIcon className={`h-4 w-4 sm:h-5 sm:w-5 ${index % 2 === 0 ? 'text-blue-600' : 'text-green-600'}`} />
                     </div>
                     <div>
                       <p className="font-medium text-gray-800 text-sm sm:text-base">{inv.planName}</p>
@@ -312,7 +306,6 @@ const Dashboard = () => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

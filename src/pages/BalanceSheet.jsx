@@ -918,8 +918,10 @@ const BalanceSheet = () => {
 {/* Header with Logo */}
 <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+    {/* Left Section: Logo + Text Below */}
     <div className="flex items-center gap-3 sm:gap-4">
-      <div className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-3">
+      <div className="flex flex-col items-center">
+        {/* Logo */}
         <div className="flex-shrink-0">
           <img 
             src="/images/logo3.jpeg" 
@@ -927,26 +929,33 @@ const BalanceSheet = () => {
             className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
           />
         </div>
-        <p className="text-[10px] sm:hidden text-blue-200 font-medium tracking-wide text-center">
-          Wealth | Trust | Growth
-        </p>
+        {/* Text Below Logo - On all devices */}
+        <div className="flex flex-col items-center mt-1">
+          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
+            Asset - Wealth Management
+          </p>
+          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
+            Wealth | Trust | Growth
+          </p>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
+    </div>
+
+    {/* Right Section: Balance Sheet + Statement Badge */}
+    <div className="flex items-center justify-end gap-3 sm:gap-4 flex-1 min-w-0">
+      <div className="text-right">
         <h1 className="text-lg sm:text-2xl font-bold truncate">Balance Sheet</h1>
         <p className="text-blue-100 text-xs sm:text-sm truncate">Generate and manage your statements</p>
       </div>
+      
+      {/* Statement Badge */}
+      <div className="flex items-center gap-2 sm:gap-3 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm flex-shrink-0">
+        <DocumentTextIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+        <span className="font-semibold text-sm sm:text-base truncate">
+          Statement
+        </span>
+      </div>
     </div>
-    <div className="flex items-center gap-2 sm:gap-3 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm">
-      <DocumentTextIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-      <span className="font-semibold text-sm sm:text-base truncate">
-        Statement
-      </span>
-    </div>
-  </div>
-  <div className="hidden sm:block mt-1">
-    <p className="text-xs text-blue-200 font-medium tracking-wide">
-      Wealth | Trust | Growth
-    </p>
   </div>
 </div>
 
