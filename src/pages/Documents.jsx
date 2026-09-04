@@ -26,7 +26,7 @@ const Documents = () => {
       try {
         // Fetch documents and investments in parallel
         const [docRes, invRes] = await Promise.all([
-          userApi.getDocuments({ type: activeTab === 'kyc' ? 'kyc' : activeTab === 'company' ? 'company' : 'other' }),
+          userApi.getDocuments(),
           userApi.getInvestments({ limit: 100 }),
         ]);
         if (docRes.data.success) {

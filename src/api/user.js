@@ -24,7 +24,7 @@ export const userApi = {
   getBalanceSheetDetails: (id) => api.get(`/users/balance-sheet/${id}`),
 
   // Documents
-  getDocuments: (params) => api.get('/users/documents', { params }),
+  getDocuments: (params) => api.get('/documents/my', { params }),
   getDocumentDetails: (id) => api.get(`/users/documents/${id}`),
 
   // Referrals

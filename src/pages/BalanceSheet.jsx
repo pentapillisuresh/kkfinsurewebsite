@@ -1253,7 +1253,7 @@ const BalanceSheet = () => {
                       </strong>
                     </div>
 
-                    <div>
+                    {summary.totalCommissions!==0 && <div>
                       Payouts:
                       <strong>
                         ₹
@@ -1261,7 +1261,7 @@ const BalanceSheet = () => {
                           summary.totalCommissions
                         }
                       </strong>
-                    </div>
+                    </div>}
 
                     <div>
                       Net Worth:

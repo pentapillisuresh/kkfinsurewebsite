@@ -2,15 +2,42 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useApi } from '../hooks/useApi';
 import { userApi } from '../api';
-import {EnvelopeIcon,PhoneIcon,CalendarIcon,IdentificationIcon,MapPinIcon,UserIcon,ShieldCheckIcon,CheckCircleIcon,ClockIcon,PencilIcon,BuildingOfficeIcon,CreditCardIcon,UserPlusIcon,BanknotesIcon,DocumentTextIcon,FolderIcon,ArrowDownTrayIcon,EyeIcon} from '@heroicons/react/24/outline';
+import {
+  EnvelopeIcon,
+  PhoneIcon,
+  CalendarIcon,
+  IdentificationIcon,
+  MapPinIcon,
+  UserIcon,
+  ShieldCheckIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  PencilIcon,
+  BuildingOfficeIcon,
+  CreditCardIcon,
+  UserPlusIcon,
+  BanknotesIcon,
+  DocumentTextIcon,
+  FolderIcon,
+  ArrowDownTrayIcon,
+  EyeIcon
+} from '@heroicons/react/24/outline';
 
 const Profile = () => {
   const { user } = useAuth();
-  const { data: profile, loading } = useApi(userApi.getProfile);
-// const baseURL="http://localhost:3000"
-const baseURL="https://service.kkfinsure.org"
-  const userData = profile || user || {};
+  const { data, loading } = useApi(userApi.getProfile);
+  
+  const baseURL = "https://service.kkfinsure.org"; // or from env
 
+  // Safely extract user data
+  const userData = data?.user || user || {};
+  
+  // Top-level counts from API response
+  const totalInvestments = data?.investmentCount || 0;
+  const totalReturns = data?.returnCount || 0;
+  const referralCount = data?.referralCount || 0;
+
+  // Personal info items
   const infoItems = [
     {
       label: 'Email Address',
@@ -62,7 +89,7 @@ const baseURL="https://service.kkfinsure.org"
     },
   ];
 
-  // ---- Helper: render document link ----
+  // Helper to render document link
   const renderDocumentLink = (filePath, title) => {
     if (!filePath) return <span className="text-gray-400 text-sm">Not uploaded</span>;
     const fullUrl = `${baseURL}/${filePath}`;
@@ -90,39 +117,34 @@ const baseURL="https://service.kkfinsure.org"
 
   return (
     <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
-   {/* Header with Logo */}
-<div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
-  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-    {/* Left Section: Logo + Text Below */}
-    <div className="flex items-center gap-3 sm:gap-4">
-      <div className="flex flex-col items-center">
-        {/* Logo */}
-        <div className="flex-shrink-0">
-          <img
-            src="/images/logo3.jpeg"
-            alt="Logo"
-            className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
-          />
-        </div>
-        {/* Text Below Logo - On all devices */}
-        <div className="flex flex-col items-center mt-1">
-          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
-            Asset - Wealth Management
-          </p>
-          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
-            Wealth | Trust | Growth
-          </p>
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex flex-col items-center">
+              <div className="flex-shrink-0">
+                <img
+                  src="/images/logo3.jpeg"
+                  alt="Logo"
+                  className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
+                />
+              </div>
+              <div className="flex flex-col items-center mt-1">
+                <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
+                  Asset - Wealth Management
+                </p>
+                <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
+                  Wealth | Trust | Growth
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex-1 min-w-0 text-center sm:text-right">
+            <h1 className="text-lg sm:text-2xl font-bold truncate">Profile</h1>
+            <p className="text-blue-100 text-xs sm:text-sm truncate">Manage your personal information</p>
+          </div>
         </div>
       </div>
-    </div>
-
-    {/* Right Section: Profile */}
-    <div className="flex-1 min-w-0 text-center sm:text-right">
-      <h1 className="text-lg sm:text-2xl font-bold truncate">Profile</h1>
-      <p className="text-blue-100 text-xs sm:text-sm truncate">Manage your personal information</p>
-    </div>
-  </div>
-</div>
 
       {/* Profile Header Card */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl p-5 sm:p-7 text-white shadow-lg">
@@ -190,19 +212,19 @@ const baseURL="https://service.kkfinsure.org"
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
           <p className="text-xs sm:text-sm text-gray-500">Total Investments</p>
           <p className="text-sm sm:text-lg font-semibold text-blue-600">
-            {userData.totalInvestments || 0}
+            {totalInvestments}
           </p>
         </div>
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
           <p className="text-xs sm:text-sm text-gray-500">Total Returns</p>
           <p className="text-sm sm:text-lg font-semibold text-green-600">
-            ₹{userData.totalReturns?.toLocaleString() || '0'}
+            ₹{totalReturns.toLocaleString()}
           </p>
         </div>
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
           <p className="text-xs sm:text-sm text-gray-500">Referrals</p>
           <p className="text-sm sm:text-lg font-semibold text-purple-600">
-            {userData.referrals || 0}
+            {referralCount}
           </p>
         </div>
       </div>
@@ -233,7 +255,6 @@ const baseURL="https://service.kkfinsure.org"
                   {item.value}
                 </p>
               </div>
-              
             </div>
           ))}
         </div>

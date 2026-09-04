@@ -40,7 +40,9 @@ const ROI = () => {
 
       try {
         const response = await userApi.getReturns({
-          type: type || undefined
+          type: type || undefined,        
+          limit: 1000
+
         });
 
         if (!response.data.success) {
@@ -216,20 +218,6 @@ const ROI = () => {
 
   const getStatusBadge = (status) => {
     const statusMap = {
-      paid: {
-        label: 'Paid',
-        icon: CheckCircleIcon,
-        color:
-          'bg-green-100 text-green-700 border-green-200'
-      },
-
-      payed: {
-        label: 'Paid',
-        icon: CheckCircleIcon,
-        color:
-          'bg-green-100 text-green-700 border-green-200'
-      },
-
       pending: {
         label: 'Pending',
         icon: ClockIcon,
@@ -238,10 +226,10 @@ const ROI = () => {
       },
 
       active: {
-        label: 'Active',
+        label: 'Paid',
         icon: CheckCircleIcon,
         color:
-          'bg-blue-100 text-blue-700 border-blue-200'
+          'bg-green-100 text-green-700 border-green-200'
       },
 
       inactive: {
@@ -270,12 +258,8 @@ const ROI = () => {
       quarterly_senior: {
         label: 'Senior Qtr',
         color: 'bg-green-100 text-green-700'
-      },
-
-      offer: {
-        label: 'Offer',
-        color: 'bg-orange-100 text-orange-700'
       }
+
     };
 
     return (
@@ -682,8 +666,7 @@ const ROI = () => {
                 '',
                 'monthly',
                 'annual_bonus',
-                'quarterly_senior',
-                'offer'
+                'quarterly_senior'
               ].map((filter) => {
 
                 const label = filter
@@ -786,11 +769,11 @@ const ROI = () => {
                           </td>
 
                           <td className="py-3 px-4 text-sm font-semibold text-green-600">
-                            +{formatCurrency(ret.amount)}
+                            +{formatCurrency(parseInt(ret.amount) * parseInt(ret.monthNo))}
                           </td>
 
                           <td className="py-3 px-4 text-sm font-semibold text-blue-600">
-                            {ret.ROI}%
+                            {parseInt(ret.ROI)}%
                           </td>
 
                           <td className="py-3 px-4">
@@ -1146,10 +1129,6 @@ const ROI = () => {
                                 <p className="text-sm font-semibold text-blue-600">
                                   {investment.InvestmentCode ||
                                     'N/A'}
-                                </p>
-
-                                <p className="text-xs text-gray-400">
-                                  {investment.id}
                                 </p>
                               </div>
 

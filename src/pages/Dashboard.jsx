@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useApi } from '../hooks/useApi';
 import { userApi } from '../api';
-import { 
-  CurrencyRupeeIcon, 
-  ChartBarIcon, 
-  UserGroupIcon, 
-  ArrowTrendingUpIcon, 
-  CalendarIcon, 
-  ClockIcon, 
-  CheckCircleIcon, 
-  ArrowRightIcon 
-} from '@heroicons/react/24/outline';
+import { CurrencyRupeeIcon, ChartBarIcon, UserGroupIcon, ArrowTrendingUpIcon, CalendarIcon, ClockIcon, CheckCircleIcon, ArrowRightIcon, IdentificationIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from "react-router-dom";
 
 // Function to get dynamic months returns from first return to current month (auto-updates)
@@ -95,7 +86,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const stats = data?.summary || {};
-  localStorage.setItem("InvestmentsSummery::", JSON.stringify(stats));
+  localStorage.setItem("InvestmentsSummery::", JSON.stringify(stats))
   const investments = data?.investments || [];
   const monthlyReturns = data?.monthlyReturns || [];
 
@@ -173,11 +164,14 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
-      {/* Header */}
+      {/* Header with Logo */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          {/* Left Section: Logo + Text Below */}
           <div className="flex flex-col items-center sm:flex-row sm:items-center gap-1 sm:gap-4">
+            {/* Logo and Text Container */}
             <div className="flex flex-col items-center">
+              {/* Logo */}
               <div className="flex-shrink-0">
                 <img
                   src="/images/logo3.jpeg"
@@ -185,6 +179,7 @@ const Dashboard = () => {
                   className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
                 />
               </div>
+              {/* Text Below Logo - On all devices */}
               <div className="flex flex-col items-center mt-1">
                 <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
                   Asset - Wealth Management
@@ -195,13 +190,14 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* Right Section: Welcome Text */}
           <div className="flex-1 min-w-0 text-center sm:text-right">
             <h1 className="text-lg sm:text-2xl font-bold truncate">Welcome {userData.fullName}</h1>
             <p className="text-blue-100 text-xs sm:text-sm truncate">Overview of your investment portfolio</p>
           </div>
         </div>
       </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         {statCards.map((stat, index) => (

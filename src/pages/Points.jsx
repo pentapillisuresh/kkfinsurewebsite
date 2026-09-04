@@ -117,16 +117,16 @@ const Points = () => {
               <p className="text-xs text-blue-100">Points Earned</p>
               <p className="text-xl font-bold">{totalEarned}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3 text-center">
+            {/* <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3 text-center">
               <p className="text-xs text-blue-100">Sources</p>
               <p className="text-xl font-bold">{sourceCount}</p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+      {/* <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100 hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between">
             <p className="text-xs sm:text-sm text-gray-500">Total Points</p>
@@ -171,7 +171,7 @@ const Points = () => {
             {totalPoints >= 100 ? 'Gold' : totalPoints >= 50 ? 'Silver' : 'Bronze'}
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Points by Source */}
       {pointsBySource.length > 0 && (

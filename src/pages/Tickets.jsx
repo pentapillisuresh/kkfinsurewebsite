@@ -1,18 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useApi } from '../hooks/useApi';
 import { userApi } from '../api';
-import {
-  PlusIcon,
-  XMarkIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  DocumentTextIcon,
-  UserIcon,
-  CalendarIcon,
-  ChatBubbleLeftRightIcon,
-  ArrowRightIcon,
-} from '@heroicons/react/24/outline';
+import {PlusIcon,XMarkIcon,CheckCircleIcon,ClockIcon,ExclamationTriangleIcon,DocumentTextIcon,UserIcon,CalendarIcon,ChatBubbleLeftRightIcon,ArrowRightIcon} from '@heroicons/react/24/outline';
 
 const Tickets = () => {
   const [showForm, setShowForm] = useState(false);
@@ -378,6 +367,12 @@ const Tickets = () => {
                               Resolved
                             </p>
                           )}
+                        </div>
+                        <div className='gap-2 sm:mt-1'>
+                        <p className="text-[10px] sm:text-xs text-green-600 flex items-center gap-0.5 sm:gap-1">
+                              <CheckCircleIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                              Resolution : {ticket.resolution}
+                            </p>
                         </div>
                       </div>
                       <div className="flex-shrink-0">

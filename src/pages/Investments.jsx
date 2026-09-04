@@ -286,13 +286,13 @@ const Investments = () => {
                       <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 bg-gray-50 rounded-lg p-3 sm:p-4 -mx-1 sm:-mx-2">
                         <div className="grid grid-cols-2 gap-2 sm:gap-4">
                           <div>
-                            <p className="text-[8px] sm:text-xs text-gray-500">Investment Date</p>
+                            <p className="text-[8px] sm:text-xs text-gray-500">Investment Start Date</p>
                             <p className="text-[10px] sm:text-sm font-medium text-gray-800 truncate">
                               {new Date(inv.investmentDate).toLocaleDateString()}
                             </p>
                           </div>
                           <div>
-                            <p className="text-[8px] sm:text-xs text-gray-500">Investment Date</p>
+                            <p className="text-[8px] sm:text-xs text-gray-500">Investment End Date</p>
                             <p className="text-[10px] sm:text-sm font-medium text-gray-800 truncate">
                               {new Date(inv.maturityDate).toLocaleDateString()}
                             </p>
@@ -306,7 +306,7 @@ const Investments = () => {
                           <div className="col-span-2">
                             <button className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium flex items-center gap-1">
                               <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                              View Full Details
+                              Minimize Details
                             </button>
                           </div>
                         </div>
