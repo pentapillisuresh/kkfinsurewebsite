@@ -15,6 +15,91 @@ ChartJS.register(
   Legend
 );
 
+// Function to get dynamic months returns from first return to current month (auto-updates)
+const getDynamicMonthsReturns = (returnsData = []) => {
+  const now = new Date();
+  
+  // Get all months that have returns - ONLY PAID/ACTIVE RETURNS
+  const returnMonths = returnsData
+    .filter(item => {
+      // Only include paid/active returns
+      const isPaid = item.status === 'paid' || item.status === 'payed' || item.status === 'active';
+      return item.month && Number(item.amount) > 0 && isPaid;
+    })
+    .map(item => new Date(item.month))
+    .sort((a, b) => a - b);
+
+  let startDate;
+  
+  if (returnMonths.length > 0) {
+    // Start from the first month with returns
+    startDate = new Date(returnMonths[0]);
+    startDate.setDate(1);
+  } else {
+    // If no returns, start from 12 months ago
+    startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+  }
+
+  // Get current month
+  const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  
+  // Calculate number of months from start to current (including current)
+  const monthsDifference = (currentMonth.getFullYear() - startDate.getFullYear()) * 12 + 
+                          (currentMonth.getMonth() - startDate.getMonth()) + 1;
+
+  // Generate months from start date to current month
+  const months = Array.from({ length: monthsDifference }, (_, index) => {
+    const date = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + index,
+      1
+    );
+
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    return {
+      key: `${year}-${String(month + 1).padStart(2, '0')}`,
+      label: date.toLocaleDateString('en-IN', {
+        month: 'short',
+        year: 'numeric'
+      }),
+      totalAmount: 0,
+      roi: 0,
+      month: date,
+      isCurrentMonth: date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(),
+      isFirstMonth: index === 0,
+      isFutureMonth: date > now // Check if it's a future month
+    };
+  });
+
+  // Map returns to months - ONLY PAID/ACTIVE RETURNS
+  const monthMap = new Map(
+    months.map(month => [month.key, month])
+  );
+
+  returnsData.forEach(item => {
+    // Only include paid/active returns
+    const isPaid = item.status === 'paid' || item.status === 'payed' || item.status === 'active';
+    if (!item.month || !isPaid) return;
+
+    const date = new Date(item.month);
+    const key = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, '0')}`;
+
+    const monthData = monthMap.get(key);
+
+    if (monthData) {
+      monthData.totalAmount += Number(item.amount || 0);
+      // Keep the highest ROI for that month
+      monthData.roi = Math.max(monthData.roi, Number(item.ROI || 0));
+    }
+  });
+
+  return months;
+};
+
 const ROI = () => {
   const [type, setType] = useState('');
   const [returns, setReturns] = useState([]);
@@ -179,6 +264,28 @@ const ROI = () => {
     fetchReturns();
   }, [type]);
 
+  // Get dynamic months for graph - ONLY PAID/ACTIVE RETURNS
+  const dynamicMonthsData = useMemo(() => {
+    if (returns.length === 0) return [];
+    
+    const dynamicData = getDynamicMonthsReturns(returns);
+    
+    // Add additional info for display
+    return dynamicData.map(item => ({
+      ...item,
+      monthLabel: item.label,
+      amount: item.totalAmount,
+      roi: item.roi || 0
+    }));
+  }, [returns]);
+
+  // Filter paid returns for stats
+  const paidReturnsData = useMemo(() => {
+    return returns.filter(ret => 
+      ret.status === 'paid' || ret.status === 'payed' || ret.status === 'active'
+    );
+  }, [returns]);
+
   /*
    * ================================================================
    * HELPERS
@@ -232,6 +339,20 @@ const ROI = () => {
           'bg-green-100 text-green-700 border-green-200'
       },
 
+      paid: {
+        label: 'Paid',
+        icon: CheckCircleIcon,
+        color:
+          'bg-green-100 text-green-700 border-green-200'
+      },
+
+      payed: {
+        label: 'Paid',
+        icon: CheckCircleIcon,
+        color:
+          'bg-green-100 text-green-700 border-green-200'
+      },
+
       inactive: {
         label: 'Inactive',
         icon: XCircleIcon,
@@ -272,7 +393,7 @@ const ROI = () => {
 
   /*
    * ================================================================
-   * TOTALS
+   * TOTALS - ONLY PAID RETURNS
    * ================================================================
    */
 
@@ -304,64 +425,44 @@ const ROI = () => {
    * Get latest month chronologically.
    */
   const latestMonthlyData = useMemo(() => {
-    if (!monthlyData.length) return null;
+    if (!dynamicMonthsData.length) return null;
 
-    return [...monthlyData].sort((a, b) =>
-      a.month.localeCompare(b.month)
-    )[monthlyData.length - 1];
-  }, [monthlyData]);
+    // Only show if there's actual paid amount
+    const paidMonths = dynamicMonthsData.filter(item => item.amount > 0);
+    if (paidMonths.length === 0) return null;
+
+    return paidMonths[paidMonths.length - 1];
+  }, [dynamicMonthsData]);
 
   const currentMonthROI =
     latestMonthlyData?.amount || 0;
 
+  // Get months with returns for count - ONLY PAID
+  const monthsWithReturns = dynamicMonthsData.filter(item => item.amount > 0);
+
+  // Get date range for display
+  const startMonth = dynamicMonthsData[0]?.monthLabel || '';
+  const endMonth = dynamicMonthsData[dynamicMonthsData.length - 1]?.monthLabel || '';
+
   /*
    * ================================================================
-   * ROI GRAPH DATA
+   * ROI GRAPH DATA - SINGLE BAR GRAPH (DYNAMIC - PAID ONLY)
    * ================================================================
-   *
-   * Uses:
-   *
-   * month
-   * amount
-   * ROI
-   *
-   * Example from your API:
-   *
-   * Dec 2025 -> ₹4,000 -> ROI 4%
-   * Jan 2026 -> ₹4,000 -> ROI 8%
-   * Feb 2026 -> ₹4,000 -> ROI 12%
-   * ...
    */
 
   const getROIChartData = () => {
-    const chartData = monthlyData;
+    const chartData = dynamicMonthsData;
 
     return {
       labels: chartData.map((item) => item.monthLabel),
 
       datasets: [
         {
-          label: 'Monthly ROI Amount',
+          label: 'Paid ROI Amount',
           data: chartData.map((item) => item.amount),
 
           backgroundColor: 'rgba(43, 70, 213, 0.8)',
           borderColor: 'rgba(43, 70, 213, 1)',
-          borderWidth: 1,
-
-          borderRadius: 5,
-
-          barPercentage: 0.6,
-          categoryPercentage: 0.7
-        },
-
-        {
-          label: 'Cumulative ROI Amount',
-          data: chartData.map(
-            (item) => item.cumulativeAmount
-          ),
-
-          backgroundColor: 'rgba(124, 184, 11, 0.75)',
-          borderColor: 'rgba(124, 184, 11, 1)',
           borderWidth: 1,
 
           borderRadius: 5,
@@ -409,9 +510,7 @@ const ROI = () => {
           label: function (context) {
             const value = context.parsed.y || 0;
 
-            return `${
-              context.dataset.label
-            }: ₹${value.toLocaleString('en-IN')}`;
+            return `${context.dataset.label}: ₹${value.toLocaleString('en-IN')}`;
           },
 
           afterBody: function (context) {
@@ -419,7 +518,9 @@ const ROI = () => {
 
             if (index === undefined) return '';
 
-            const item = monthlyData[index];
+            const item = dynamicMonthsData[index];
+
+            if (!item) return '';
 
             return [
               `ROI: ${item.roi}%`,
@@ -456,21 +557,15 @@ const ROI = () => {
         ticks: {
           callback: function (value) {
             if (value >= 10000000) {
-              return `₹${(
-                value / 10000000
-              ).toFixed(1)}Cr`;
+              return `₹${(value / 10000000).toFixed(1)}Cr`;
             }
 
             if (value >= 100000) {
-              return `₹${(
-                value / 100000
-              ).toFixed(1)}L`;
+              return `₹${(value / 100000).toFixed(1)}L`;
             }
 
             if (value >= 1000) {
-              return `₹${(
-                value / 1000
-              ).toFixed(1)}K`;
+              return `₹${(value / 1000).toFixed(1)}K`;
             }
 
             return `₹${value}`;
@@ -576,7 +671,7 @@ const ROI = () => {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
           <p className="text-xs sm:text-sm text-gray-500">
-            Current Month ROI
+            Current Month ROI (Paid)
           </p>
 
           <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-1">
@@ -592,7 +687,7 @@ const ROI = () => {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
           <p className="text-xs sm:text-sm text-gray-500">
-            Paid ROI
+            Total Paid ROI
           </p>
 
           <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-1">
@@ -636,7 +731,7 @@ const ROI = () => {
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            ROI Graph
+            ROI Graph (Paid Only)
           </button>
 
           <button
@@ -908,45 +1003,45 @@ const ROI = () => {
         )}
 
         {/* =========================================================
-            GRAPH TAB
+            GRAPH TAB - PAID ONLY
         ========================================================== */}
 
         {activeTab === 'graph' && (
           <div className="p-4 sm:p-5">
 
-            {monthlyData.length > 0 ? (
+            {dynamicMonthsData.length > 0 ? (
               <>
 
-                <div className="mb-4">
-
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Monthly ROI
-                  </h3>
-
-                  <p className="text-xs text-gray-500 mt-1">
-                    Monthly return amount from your investments
-                  </p>
-
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Paid ROI
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {startMonth} - {endMonth} • {monthsWithReturns.length} month{monthsWithReturns.length !== 1 ? 's' : ''} with paid returns
+                    </p>
+                    {dynamicMonthsData[dynamicMonthsData.length - 1]?.isCurrentMonth && (
+                      <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                        <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        Auto-updates with new paid returns
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-right mt-2 sm:mt-0">
+                    <p className="text-xs text-gray-500">Total Paid ROI</p>
+                    <p className="text-lg font-bold text-blue-600">
+                      {formatCurrency(dynamicMonthsData.reduce((sum, item) => sum + item.amount, 0))}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex justify-end mb-4 gap-4">
-
+                <div className="flex justify-end mb-4">
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
-
                     <span className="text-xs text-gray-600">
-                      Monthly ROI
+                      Paid ROI
                     </span>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
-
-                    <span className="text-xs text-gray-600">
-                      Cumulative ROI
-                    </span>
-                  </div>
-
                 </div>
 
                 <div className="h-[300px] sm:h-[400px]">
@@ -958,7 +1053,7 @@ const ROI = () => {
 
                 </div>
 
-                {/* Monthly ROI details */}
+                {/* Monthly ROI details - Paid Only */}
                 <div className="mt-6 overflow-x-auto">
 
                   <table className="w-full">
@@ -971,7 +1066,7 @@ const ROI = () => {
                         </th>
 
                         <th className="text-right py-2 px-3 text-xs font-semibold text-gray-500">
-                          Amount
+                          Paid Amount
                         </th>
 
                         <th className="text-right py-2 px-3 text-xs font-semibold text-gray-500">
@@ -983,14 +1078,15 @@ const ROI = () => {
 
                     <tbody>
 
-                      {monthlyData.map((item) => (
+                      {dynamicMonthsData.map((item) => (
                         <tr
-                          key={item.month}
+                          key={item.key}
                           className="border-b border-gray-100"
                         >
 
                           <td className="py-2 px-3 text-sm text-gray-700">
                             {item.monthLabel}
+                            {item.isCurrentMonth && ' 📍'}
                           </td>
 
                           <td className="py-2 px-3 text-sm font-semibold text-right text-blue-600">
@@ -1010,6 +1106,34 @@ const ROI = () => {
 
                 </div>
 
+                {/* Summary Stats */}
+                <div className="mt-6 pt-4 border-t border-gray-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <p className="text-xs text-gray-500">Total Paid Returns</p>
+                      <p className="text-lg font-bold text-blue-600">
+                        {formatCurrency(dynamicMonthsData.reduce((sum, item) => sum + item.amount, 0))}
+                      </p>
+                    </div>
+                    <div className="bg-purple-50 p-3 rounded-lg">
+                      <p className="text-xs text-gray-500">Months with Paid Returns</p>
+                      <p className="text-lg font-bold text-purple-600">
+                        {monthsWithReturns.length} / {dynamicMonthsData.length}
+                      </p>
+                    </div>
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <p className="text-xs text-gray-500">Auto Update</p>
+                      <p className="text-sm font-bold text-green-600 flex items-center gap-1">
+                        <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        Active
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-1">
+                        New paid returns added automatically
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
               </>
             ) : (
               <div className="text-center py-12">
@@ -1019,7 +1143,7 @@ const ROI = () => {
                 </div>
 
                 <p className="text-gray-500">
-                  No data available for graph
+                  No paid returns available for graph
                 </p>
 
               </div>

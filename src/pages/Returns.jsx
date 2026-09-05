@@ -33,7 +33,7 @@ const Returns = () => {
   const loaderRef = useRef(null);
   const itemsPerPage = 20;
   const summary = localStorage.getItem("InvestmentsSummery::")
-  const totalReturns = JSON.parse(summary).totalPaidReturns;
+  const totalReturns = JSON.parse(summary)?.totalPaidReturns || 0;
 
   const fetchReturns = async (pageNum, resetData = false) => {
     try {
@@ -44,17 +44,24 @@ const Returns = () => {
       });
 
       if (data.success) {
-        const newReturns = data.data.returns || [];
+        // Filter only paid/active returns
+        const allReturns = data.data.returns || [];
+        const paidReturns = allReturns.filter(ret => 
+          ret.status === 'paid' || 
+          ret.status === 'payed' || 
+          ret.status === 'active'
+        );
+        
         const totalCount = data.data.total || 0;
 
         if (resetData) {
-          setReturns(newReturns);
+          setReturns(paidReturns);
         } else {
-          setReturns(prev => [...prev, ...newReturns]);
+          setReturns(prev => [...prev, ...paidReturns]);
         }
 
-        const currentTotal = resetData ? newReturns.length : returns.length + newReturns.length;
-        setHasMore(currentTotal < totalCount && newReturns.length === itemsPerPage);
+        const currentTotal = resetData ? paidReturns.length : returns.length + paidReturns.length;
+        setHasMore(currentTotal < totalCount && paidReturns.length === itemsPerPage);
         setPage(pageNum);
       } else {
         setError(data.message || 'Failed to fetch returns');
@@ -128,7 +135,7 @@ const Returns = () => {
 
       return (
         r.type === 'monthly' &&
-        r.status === 'active' &&
+        (r.status === 'active' || r.status === 'paid' || r.status === 'payed') &&
         date.getMonth() === new Date().getMonth() &&
         date.getFullYear() === new Date().getFullYear()
       );
@@ -194,7 +201,7 @@ const Returns = () => {
     <div className="flex items-center justify-end gap-3 sm:gap-4 flex-1 min-w-0">
       <div className="text-right">
         <h1 className="text-lg sm:text-2xl font-bold truncate">Returns</h1>
-        <p className="text-blue-100 text-xs sm:text-sm truncate">Track your investment returns</p>
+        <p className="text-blue-100 text-xs sm:text-sm truncate">Track your paid investment returns</p>
       </div>
       
       {/* Amount Badge */}
@@ -211,21 +218,28 @@ const Returns = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-500">Total Returns</p>
+          <p className="text-xs sm:text-sm text-gray-500">Total Paid Returns</p>
           <p className="text-lg sm:text-2xl font-bold text-green-600">
             ₹{totalReturns.toLocaleString()}
           </p>
         </div>
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-500">Current Month</p>
+          <p className="text-xs sm:text-sm text-gray-500">Current Month Paid</p>
           <p className="text-lg sm:text-2xl font-bold text-blue-600">
             ₹{currentMonthPaidReturns.toLocaleString()}
           </p>
         </div>
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-500">Total Returns</p>
+          <p className="text-xs sm:text-sm text-gray-500">Total Paid Returns</p>
           <p className="text-lg sm:text-2xl font-bold text-orange-600">
             {returns.length}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500">Status</p>
+          <p className="text-lg sm:text-2xl font-bold text-green-600 flex items-center gap-1">
+            <CheckCircleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            Paid
           </p>
         </div>
       </div>
@@ -259,8 +273,8 @@ const Returns = () => {
           <div className="flex justify-center text-gray-300 mb-4">
             <DocumentTextIcon className="h-16 w-16" />
           </div>
-          <p className="text-gray-500 text-base sm:text-lg">No returns found</p>
-          <p className="text-gray-400 text-xs sm:text-sm mt-2">Start investing to see your returns</p>
+          <p className="text-gray-500 text-base sm:text-lg">No paid returns found</p>
+          <p className="text-gray-400 text-xs sm:text-sm mt-2">Paid returns will appear here once processed</p>
         </div>
       ) : (
         <>
@@ -268,6 +282,9 @@ const Returns = () => {
             {returns.map((ret) => {
               const TypeIcon = getTypeIcon(ret.type);
               const typeColor = getTypeColor(ret.type);
+              // Determine if it's a bonus or senior plan for display
+              const isBonus = ret.type === 'annual_bonus';
+              const isSenior = ret.type === 'quarterly_senior';
 
               return (
                 <div
@@ -287,6 +304,10 @@ const Returns = () => {
                             <TypeIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                             {getTypeLabel(ret.type)}
                           </span>
+                          <span className="inline-flex items-center gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
+                            <CheckCircleIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                            Paid
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-4 mt-0.5 sm:mt-1">
                           <p className="text-[10px] sm:text-sm text-gray-500 flex items-center gap-0.5 sm:gap-1">
@@ -302,6 +323,18 @@ const Returns = () => {
                               Paid: {new Date(ret.paidOn).toLocaleDateString()}
                             </p>
                           )}
+                          {isBonus && (
+                            <span className="text-[10px] sm:text-xs text-purple-600 font-medium flex items-center gap-1">
+                              <GiftIcon className="h-3 w-3" />
+                              Bonus
+                            </span>
+                          )}
+                          {isSenior && (
+                            <span className="text-[10px] sm:text-xs text-blue-600 font-medium flex items-center gap-1">
+                              <UserGroupIcon className="h-3 w-3" />
+                              Senior Plan
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
@@ -311,7 +344,7 @@ const Returns = () => {
                         <p className="text-[10px] sm:text-xs text-gray-400">
                           {ret.type === 'monthly' ? 'Monthly Return' :
                             ret.type === 'annual_bonus' ? 'Bonus' :
-                              ret.type === 'quarterly_senior' ? 'Senior Plan' : 'Offer'
+                              ret.type === 'quarterly_senior' ? 'Senior Plan' : 'Return'
                           }
                         </p>
                       </div>
@@ -319,9 +352,9 @@ const Returns = () => {
 
                     <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
                       <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500 mb-1">
-                        <span>Return Status</span>
-                        <span className="flex items-center gap-1">
-                          <CheckCircleIcon className="h-3 w-3 text-green-500" />
+                        <span>Payment Status</span>
+                        <span className="flex items-center gap-1 text-green-600 font-medium">
+                          <CheckCircleIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                           Completed
                         </span>
                       </div>
@@ -343,12 +376,12 @@ const Returns = () => {
             {loadingMore && (
               <div className="flex items-center gap-3">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                <span className="text-sm text-gray-500">Loading more returns...</span>
+                <span className="text-sm text-gray-500">Loading more paid returns...</span>
               </div>
             )}
             {!hasMore && returns.length > 0 && (
               <div className="text-center py-4">
-                <p className="text-sm text-gray-400">You've seen all {returns.length} returns</p>
+                <p className="text-sm text-gray-400">You've seen all {returns.length} paid returns</p>
               </div>
             )}
             {!loadingMore && hasMore && returns.length >= 20 && (
