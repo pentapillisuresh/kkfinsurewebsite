@@ -48,7 +48,7 @@ const Returns = () => {
         const allReturns = data.data.returns || [];
         const paidReturns = allReturns.filter(ret => 
           ret.status === 'paid' || 
-          ret.status === 'payed' || 
+          ret.status === 'pending' || 
           ret.status === 'active'
         );
         
