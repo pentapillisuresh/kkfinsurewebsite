@@ -1,5 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from 'react';
+
 import { userApi } from '../api';
+
 import {
   CurrencyRupeeIcon,
   CalendarIcon,
@@ -25,70 +32,169 @@ const TYPE_ICONS = {
 const Returns = () => {
   const [type, setType] = useState('');
   const [returns, setReturns] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const [error, setError] = useState(null);
-  const loaderRef = useRef(null);
-  const itemsPerPage = 20;
-  const summary = localStorage.getItem("InvestmentsSummery::")
-  const totalReturns = JSON.parse(summary)?.totalPaidReturns || 0;
 
-  const fetchReturns = async (pageNum, resetData = false) => {
+  const [error, setError] = useState(null);
+
+  const loaderRef = useRef(null);
+
+  const itemsPerPage = 20;
+
+  // =========================================================
+  // TOTAL PAID RETURNS FROM LOCAL STORAGE
+  // =========================================================
+
+  const getInvestmentSummary = () => {
+    try {
+      const summary = localStorage.getItem(
+        'InvestmentsSummery::'
+      );
+
+      if (!summary) {
+        return {};
+      }
+
+      return JSON.parse(summary) || {};
+    } catch (error) {
+      console.error(
+        'Failed to parse InvestmentsSummery::',
+        error
+      );
+
+      return {};
+    }
+  };
+
+  const summary = getInvestmentSummary();
+
+  const totalPaidReturns = Number(
+    summary?.totalPaidReturns || 0
+  );
+
+  // =========================================================
+  // FETCH RETURNS
+  // =========================================================
+
+  const fetchReturns = async (
+    pageNum,
+    resetData = false
+  ) => {
     try {
       const { data } = await userApi.getReturns({
         type: type || undefined,
         page: pageNum,
-        limit: itemsPerPage
+        limit: itemsPerPage,
       });
 
       if (data.success) {
-        // Filter only paid/active returns
-        const allReturns = data.data.returns || [];
-        const paidReturns = allReturns.filter(ret => 
-          ret.status === 'paid' || 
-          ret.status === 'pending' || 
-          ret.status === 'active'
+        const allReturns =
+          data.data?.returns || [];
+
+        /*
+         * Show paid, pending and active records.
+         */
+        const filteredReturns = allReturns.filter(
+          (ret) =>
+            ret.status === 'paid' ||
+            ret.status === 'payed' ||
+            ret.status === 'pending' ||
+            ret.status === 'active'
         );
-        
-        const totalCount = data.data.total || 0;
+
+        const totalCount =
+          data.data?.total || 0;
 
         if (resetData) {
-          setReturns(paidReturns);
+          setReturns(filteredReturns);
         } else {
-          setReturns(prev => [...prev, ...paidReturns]);
+          setReturns((prev) => [
+            ...prev,
+            ...filteredReturns,
+          ]);
         }
 
-        const currentTotal = resetData ? paidReturns.length : returns.length + paidReturns.length;
-        setHasMore(currentTotal < totalCount && paidReturns.length === itemsPerPage);
+        const currentTotal = resetData
+          ? filteredReturns.length
+          : returns.length +
+            filteredReturns.length;
+
+        setHasMore(
+          currentTotal < totalCount &&
+            allReturns.length === itemsPerPage
+        );
+
         setPage(pageNum);
       } else {
-        setError(data.message || 'Failed to fetch returns');
+        setError(
+          data.message ||
+            'Failed to fetch returns'
+        );
       }
     } catch (err) {
-      setError(err.message || 'An error occurred');
+      console.error(
+        'Error fetching returns:',
+        err
+      );
+
+      setError(
+        err.message ||
+          'An error occurred'
+      );
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
   };
 
+  // =========================================================
+  // LOAD DATA WHEN FILTER CHANGES
+  // =========================================================
+
   useEffect(() => {
     setLoading(true);
     setReturns([]);
     setPage(1);
     setHasMore(true);
+    setError(null);
+
     fetchReturns(1, true);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
-  const handleObserver = useCallback((entries) => {
-    const target = entries[0];
-    if (target.isIntersecting && hasMore && !loading && !loadingMore) {
-      setLoadingMore(true);
-      fetchReturns(page + 1);
-    }
-  }, [hasMore, loading, loadingMore, page]);
+  // =========================================================
+  // INFINITE SCROLL
+  // =========================================================
+
+  const handleObserver = useCallback(
+    (entries) => {
+      const target = entries[0];
+
+      if (
+        target.isIntersecting &&
+        hasMore &&
+        !loading &&
+        !loadingMore
+      ) {
+        setLoadingMore(true);
+
+        fetchReturns(page + 1);
+      }
+    },
+    [
+      hasMore,
+      loading,
+      loadingMore,
+      page,
+      type,
+      returns.length,
+    ]
+  );
 
   useEffect(() => {
     const option = {
@@ -96,302 +202,820 @@ const Returns = () => {
       rootMargin: '20px',
       threshold: 0,
     };
-    const observer = new IntersectionObserver(handleObserver, option);
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
+
+    const observer =
+      new IntersectionObserver(
+        handleObserver,
+        option
+      );
+
+    const currentLoader =
+      loaderRef.current;
+
+    if (currentLoader) {
+      observer.observe(currentLoader);
     }
+
     return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
+      if (currentLoader) {
+        observer.unobserve(
+          currentLoader
+        );
       }
     };
   }, [handleObserver]);
 
-  const getTypeLabel = (type) => {
+  // =========================================================
+  // TYPE LABEL
+  // =========================================================
+
+  const getTypeLabel = (
+    returnType
+  ) => {
     const labels = {
       monthly: 'Monthly',
       annual_bonus: 'Annual Bonus',
-      quarterly_senior: 'Quarterly (Senior)'
+      quarterly_senior:
+        'Quarterly (Senior)',
+      offer: 'Offer',
     };
-    return labels[type] || type;
+
+    return (
+      labels[returnType] ||
+      returnType ||
+      'Return'
+    );
   };
 
-  const getTypeColor = (type) => {
+  // =========================================================
+  // TYPE COLOR
+  // =========================================================
+
+  const getTypeColor = (
+    returnType
+  ) => {
     const colors = {
-      monthly: 'bg-green-100 text-green-700 border-green-200',
-      annual_bonus: 'bg-purple-100 text-purple-700 border-purple-200',
-      quarterly_senior: 'bg-blue-100 text-blue-700 border-blue-200'
+      monthly:
+        'bg-green-100 text-green-700 border-green-200',
+
+      annual_bonus:
+        'bg-purple-100 text-purple-700 border-purple-200',
+
+      quarterly_senior:
+        'bg-blue-100 text-blue-700 border-blue-200',
+
+      offer:
+        'bg-yellow-100 text-yellow-700 border-yellow-200',
     };
-    return colors[type] || 'bg-gray-100 text-gray-700 border-gray-200';
+
+    return (
+      colors[returnType] ||
+      'bg-gray-100 text-gray-700 border-gray-200'
+    );
   };
 
-  const getTypeIcon = (type) => {
-    return TYPE_ICONS[type] || TYPE_ICONS.default;
+  // =========================================================
+  // TYPE ICON
+  // =========================================================
+
+  const getTypeIcon = (
+    returnType
+  ) => {
+    return (
+      TYPE_ICONS[returnType] ||
+      TYPE_ICONS.default
+    );
   };
 
-  const currentMonthPaidReturns = returns
-    .filter(r => {
-      const date = new Date(r.month);
+  // =========================================================
+  // STATUS HELPERS
+  // =========================================================
 
-      return (
-        r.type === 'monthly' &&
-        (r.status === 'active' || r.status === 'paid' || r.status === 'payed') &&
-        date.getMonth() === new Date().getMonth() &&
-        date.getFullYear() === new Date().getFullYear()
+  const isPaidStatus = (
+    status
+  ) => {
+    return (
+      status === 'paid' ||
+      status === 'payed' ||
+      status === 'active'
+    );
+  };
+
+  const isPendingStatus = (
+    status
+  ) => {
+    return status === 'pending';
+  };
+
+  // =========================================================
+  // CURRENT MONTH PAID RETURNS
+  // =========================================================
+
+  const currentMonthPaidReturns =
+    returns
+      .filter((r) => {
+        if (!r.month) {
+          return false;
+        }
+
+        const date = new Date(
+          r.month
+        );
+
+        const now = new Date();
+
+        return (
+          r.type === 'monthly' &&
+          isPaidStatus(r.status) &&
+          date.getMonth() ===
+            now.getMonth() &&
+          date.getFullYear() ===
+            now.getFullYear()
+        );
+      })
+      .reduce(
+        (sum, r) =>
+          sum +
+          Number.parseFloat(
+            r.amount || 0
+          ),
+        0
       );
-    })
-    .reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
 
-  const bonusReturns = returns.filter(r => r.type === 'annual_bonus').reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
+  // =========================================================
+  // PAID RETURNS COUNT
+  // =========================================================
+
+  const paidReturnsCount =
+    returns.filter((r) =>
+      isPaidStatus(r.status)
+    ).length;
+
+  // =========================================================
+  // LOADING SCREEN
+  // =========================================================
 
   if (loading && page === 1) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+
       </div>
     );
   }
 
-  if (error && returns.length === 0) {
+  // =========================================================
+  // ERROR SCREEN
+  // =========================================================
+
+  if (
+    error &&
+    returns.length === 0
+  ) {
     return (
       <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+
         <div className="flex justify-center text-red-500 mb-4">
+
           <ExclamationTriangleIcon className="h-16 w-16" />
+
         </div>
-        <p className="text-red-500 font-medium">{error}</p>
+
+        <p className="text-red-500 font-medium">
+          {error}
+        </p>
+
         <button
-          onClick={() => window.location.reload()}
+          onClick={() =>
+            window.location.reload()
+          }
           className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm hover:shadow"
         >
           Retry
         </button>
+
       </div>
     );
   }
 
+  // =========================================================
+  // MAIN UI
+  // =========================================================
+
   return (
     <div className="space-y-4 sm:space-y-6 px-3 sm:px-0 pb-20">
-    {/* Header with Logo */}
-<div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
-  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-    {/* Left Section: Logo + Text Below */}
-    <div className="flex items-center gap-3 sm:gap-4">
-      <div className="flex flex-col items-center">
-        {/* Logo */}
-        <div className="flex-shrink-0">
-          <img
-            src="/images/logo3.jpeg"
-            alt="Logo"
-            className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
-          />
-        </div>
-        {/* Text Below Logo - On all devices */}
-        <div className="flex flex-col items-center mt-1">
-          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
-            Asset - Wealth Management
-          </p>
-          <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
-            Wealth | Trust | Growth
-          </p>
-        </div>
-      </div>
-    </div>
 
-    {/* Right Section: Returns + Amount Badge */}
-    <div className="flex items-center justify-end gap-3 sm:gap-4 flex-1 min-w-0">
-      <div className="text-right">
-        <h1 className="text-lg sm:text-2xl font-bold truncate">Returns</h1>
-        <p className="text-blue-100 text-xs sm:text-sm truncate">Track your paid investment returns</p>
-      </div>
-      
-      {/* Amount Badge */}
-      <div className="flex items-center gap-2 sm:gap-3 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm flex-shrink-0">
-        <CurrencyRupeeIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-        <span className="font-semibold text-sm sm:text-base truncate">
-          ₹{totalReturns.toLocaleString()}
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
 
-      {/* Stats Cards */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+
+          {/* LEFT - LOGO */}
+
+          <div className="flex items-center gap-3 sm:gap-4">
+
+            <div className="flex flex-col items-center">
+
+              <div className="flex-shrink-0">
+
+                <img
+                  src="/images/logo3.jpeg"
+                  alt="Logo"
+                  className="h-14 w-14 sm:h-12 sm:w-auto bg-transparent sm:bg-white rounded-lg p-0 sm:p-1 shadow-none sm:shadow-md object-contain"
+                />
+
+              </div>
+
+              <div className="flex flex-col items-center mt-1">
+
+                <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
+                  Asset - Wealth Management
+                </p>
+
+                <p className="text-[10px] sm:text-xs text-blue-200 font-medium tracking-wide text-center">
+                  Wealth | Trust | Growth
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* RIGHT */}
+
+          <div className="flex items-center justify-end gap-3 sm:gap-4 flex-1 min-w-0">
+
+            <div className="text-right">
+
+              <h1 className="text-lg sm:text-2xl font-bold truncate">
+                Returns
+              </h1>
+
+              <p className="text-blue-100 text-xs sm:text-sm truncate">
+                Track your investment returns
+              </p>
+
+            </div>
+
+            {/* TOTAL PAID BADGE */}
+
+            <div className="flex items-center gap-2 sm:gap-3 bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-sm flex-shrink-0">
+
+              <CurrencyRupeeIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+
+              <span className="font-semibold text-sm sm:text-base truncate">
+
+                ₹
+                {totalPaidReturns.toLocaleString()}
+
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* =====================================================
+          STATS CARDS
+      ===================================================== */}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+
+        {/* TOTAL PAID RETURNS */}
+
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-500">Total Paid Returns</p>
+
+          <p className="text-xs sm:text-sm text-gray-500">
+            Total Paid Returns
+          </p>
+
           <p className="text-lg sm:text-2xl font-bold text-green-600">
-            ₹{totalReturns.toLocaleString()}
+
+            ₹
+            {totalPaidReturns.toLocaleString()}
+
           </p>
+
         </div>
+
+        {/* CURRENT MONTH PAID */}
+
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-500">Current Month Paid</p>
+
+          <p className="text-xs sm:text-sm text-gray-500">
+            Current Month Paid
+          </p>
+
           <p className="text-lg sm:text-2xl font-bold text-blue-600">
-            ₹{currentMonthPaidReturns.toLocaleString()}
+
+            ₹
+            {currentMonthPaidReturns.toLocaleString()}
+
           </p>
+
         </div>
+
+        {/* PAID RETURNS COUNT */}
+
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-500">Total Paid Returns</p>
+
+          <p className="text-xs sm:text-sm text-gray-500">
+            Paid Returns
+          </p>
+
           <p className="text-lg sm:text-2xl font-bold text-orange-600">
-            {returns.length}
+
+            {paidReturnsCount}
+
           </p>
+
         </div>
+
+        {/* STATUS */}
+
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-500">Status</p>
-          <p className="text-lg sm:text-2xl font-bold text-green-600 flex items-center gap-1">
-            <CheckCircleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-            Paid
+
+          <p className="text-xs sm:text-sm text-gray-500">
+            Status
           </p>
+
+          <p className="text-lg sm:text-2xl font-bold text-green-600 flex items-center gap-1">
+
+            <CheckCircleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+
+            Paid
+
+          </p>
+
         </div>
+
       </div>
 
-      {/* Filters */}
+      {/* =====================================================
+          FILTERS
+      ===================================================== */}
+
       <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100 sticky top-0 z-10">
+
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
-          {['', 'monthly', 'annual_bonus', 'quarterly_senior'].map((filter) => (
+
+          {[
+            '',
+            'monthly',
+            'annual_bonus',
+            'quarterly_senior',
+          ].map((filter) => (
+
             <button
-              key={filter || 'all'}
-              onClick={() => setType(filter)}
-              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${type === filter
+              key={
+                filter || 'all'
+              }
+              onClick={() =>
+                setType(filter)
+              }
+              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+                type === filter
                   ? 'bg-blue-600 text-white shadow-md scale-105'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105'
-                }`}
+              }`}
             >
-              {filter ? getTypeLabel(filter) : 'All'}
+
+              {filter
+                ? getTypeLabel(
+                    filter
+                  )
+                : 'All'}
+
               {filter && (
+
                 <span className="ml-1 sm:ml-2 text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 rounded-full">
-                  {returns.filter(r => r.type === filter).length}
+
+                  {
+                    returns.filter(
+                      (r) =>
+                        r.type ===
+                        filter
+                    ).length
+                  }
+
                 </span>
+
               )}
+
             </button>
+
           ))}
+
         </div>
+
       </div>
 
-      {/* Returns List */}
+      {/* =====================================================
+          NO RETURNS
+      ===================================================== */}
+
       {returns.length === 0 ? (
+
         <div className="text-center py-12 sm:py-16 bg-white rounded-xl shadow-sm border border-gray-100">
+
           <div className="flex justify-center text-gray-300 mb-4">
+
             <DocumentTextIcon className="h-16 w-16" />
+
           </div>
-          <p className="text-gray-500 text-base sm:text-lg">No paid returns found</p>
-          <p className="text-gray-400 text-xs sm:text-sm mt-2">Paid returns will appear here once processed</p>
+
+          <p className="text-gray-500 text-base sm:text-lg">
+
+            No returns found
+
+          </p>
+
+          <p className="text-gray-400 text-xs sm:text-sm mt-2">
+
+            Returns will appear here once processed
+
+          </p>
+
         </div>
+
       ) : (
+
         <>
+
+          {/* =================================================
+              RETURNS LIST
+          ================================================= */}
+
           <div className="space-y-3 sm:space-y-4">
-            {returns.map((ret) => {
-              const TypeIcon = getTypeIcon(ret.type);
-              const typeColor = getTypeColor(ret.type);
-              // Determine if it's a bonus or senior plan for display
-              const isBonus = ret.type === 'annual_bonus';
-              const isSenior = ret.type === 'quarterly_senior';
 
-              return (
-                <div
-                  key={ret.id}
-                  className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden group"
-                >
-                  <div className="p-3 sm:p-5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
-                          <h3 className="font-semibold text-gray-800 text-sm sm:text-lg truncate max-w-[150px] sm:max-w-full">
-                            {ret.investment?.InvestmentCode || 'Return'}
-                          </h3>
-                          <span
-                            className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium border ${typeColor} flex-shrink-0`}
+            {returns.map(
+              (ret) => {
+
+                const TypeIcon =
+                  getTypeIcon(
+                    ret.type
+                  );
+
+                const typeColor =
+                  getTypeColor(
+                    ret.type
+                  );
+
+                const isBonus =
+                  ret.type ===
+                  'annual_bonus';
+
+                const isSenior =
+                  ret.type ===
+                  'quarterly_senior';
+
+                const isPending =
+                  isPendingStatus(
+                    ret.status
+                  );
+
+                const isPaid =
+                  isPaidStatus(
+                    ret.status
+                  );
+
+                const amount =
+                  Number.parseFloat(
+                    ret.amount || 0
+                  );
+
+                return (
+
+                  <div
+                    key={ret.id}
+                    className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden group"
+                  >
+
+                    <div className="p-3 sm:p-5">
+
+                      <div className="flex items-start justify-between gap-2">
+
+                        {/* LEFT */}
+
+                        <div className="flex-1 min-w-0">
+
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
+
+                            {/* INVESTMENT CODE */}
+
+                            <h3 className="font-semibold text-gray-800 text-sm sm:text-lg truncate max-w-[150px] sm:max-w-full">
+
+                              {ret
+                                .investment
+                                ?.InvestmentCode ||
+                                'Return'}
+
+                            </h3>
+
+                            {/* TYPE */}
+
+                            <span
+                              className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium border ${typeColor} flex-shrink-0`}
+                            >
+
+                              <TypeIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+
+                              {getTypeLabel(
+                                ret.type
+                              )}
+
+                            </span>
+
+                            {/* STATUS */}
+
+                            {isPending ? (
+
+                              <span className="inline-flex items-center gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-orange-100 text-orange-700 border border-orange-200 flex-shrink-0">
+
+                                <ClockIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+
+                                Pending
+
+                              </span>
+
+                            ) : (
+
+                              <span className="inline-flex items-center gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
+
+                                <CheckCircleIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+
+                                Paid
+
+                              </span>
+
+                            )}
+
+                          </div>
+
+                          {/* DATE INFORMATION */}
+
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-0.5 sm:mt-1">
+
+                            {ret.month && (
+
+                              <p className="text-[10px] sm:text-sm text-gray-500 flex items-center gap-0.5 sm:gap-1">
+
+                                <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+
+                                {new Date(
+                                  ret.month
+                                ).toLocaleDateString(
+                                  'en-US',
+                                  {
+                                    month:
+                                      'long',
+                                    year:
+                                      'numeric',
+                                  }
+                                )}
+
+                              </p>
+
+                            )}
+
+                            {/* PAID DATE */}
+
+                            {ret.paidOn &&
+                              isPaid && (
+
+                                <p className="text-[10px] sm:text-sm text-gray-400 flex items-center gap-0.5 sm:gap-1">
+
+                                  <ClockIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+
+                                  Paid:{' '}
+
+                                  {new Date(
+                                    ret.paidOn
+                                  ).toLocaleDateString()}
+
+                                </p>
+
+                              )}
+
+                            {/* BONUS */}
+
+                            {isBonus && (
+
+                              <span className="text-[10px] sm:text-xs text-purple-600 font-medium flex items-center gap-1">
+
+                                <GiftIcon className="h-3 w-3" />
+
+                                Bonus
+
+                              </span>
+
+                            )}
+
+                            {/* SENIOR */}
+
+                            {isSenior && (
+
+                              <span className="text-[10px] sm:text-xs text-blue-600 font-medium flex items-center gap-1">
+
+                                <UserGroupIcon className="h-3 w-3" />
+
+                                Senior Plan
+
+                              </span>
+
+                            )}
+
+                          </div>
+
+                        </div>
+
+                        {/* ===============================
+                            AMOUNT
+                        =============================== */}
+
+                        <div className="text-right flex-shrink-0">
+
+                          <p
+                            className={`text-base sm:text-2xl font-bold ${
+                              isPending
+                                ? 'text-orange-600'
+                                : 'text-green-600'
+                            }`}
                           >
-                            <TypeIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                            {getTypeLabel(ret.type)}
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
-                            <CheckCircleIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                            Paid
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 sm:gap-4 mt-0.5 sm:mt-1">
-                          <p className="text-[10px] sm:text-sm text-gray-500 flex items-center gap-0.5 sm:gap-1">
-                            <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                            {new Date(ret.month).toLocaleDateString('en-US', {
-                              month: 'long',
-                              year: 'numeric',
-                            })}
+
+                            {isPaid
+                              ? '+'
+                              : ''}
+
+                            ₹
+                            {amount.toLocaleString()}
+
                           </p>
-                          {ret.paidOn && (
-                            <p className="text-[10px] sm:text-sm text-gray-400 flex items-center gap-0.5 sm:gap-1">
-                              <ClockIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                              Paid: {new Date(ret.paidOn).toLocaleDateString()}
-                            </p>
-                          )}
-                          {isBonus && (
-                            <span className="text-[10px] sm:text-xs text-purple-600 font-medium flex items-center gap-1">
-                              <GiftIcon className="h-3 w-3" />
-                              Bonus
-                            </span>
-                          )}
-                          {isSenior && (
-                            <span className="text-[10px] sm:text-xs text-blue-600 font-medium flex items-center gap-1">
-                              <UserGroupIcon className="h-3 w-3" />
-                              Senior Plan
-                            </span>
-                          )}
+
+                          <p className="text-[10px] sm:text-xs text-gray-400">
+
+                            {ret.type ===
+                            'monthly'
+                              ? 'Monthly Return'
+                              : ret.type ===
+                                'annual_bonus'
+                              ? 'Bonus'
+                              : ret.type ===
+                                'quarterly_senior'
+                              ? 'Senior Plan'
+                              : 'Return'}
+
+                          </p>
+
                         </div>
+
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-base sm:text-2xl font-bold text-green-600">
-                          +₹{parseFloat(ret.amount).toLocaleString()}
-                        </p>
-                        <p className="text-[10px] sm:text-xs text-gray-400">
-                          {ret.type === 'monthly' ? 'Monthly Return' :
-                            ret.type === 'annual_bonus' ? 'Bonus' :
-                              ret.type === 'quarterly_senior' ? 'Senior Plan' : 'Return'
-                          }
-                        </p>
+
+                      {/* ===============================
+                          PAYMENT STATUS
+                      =============================== */}
+
+                      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
+
+                        <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500 mb-1">
+
+                          <span>
+                            Payment Status
+                          </span>
+
+                          {isPending ? (
+
+                            <span className="flex items-center gap-1 text-orange-600 font-medium">
+
+                              <ClockIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+
+                              Pending
+
+                            </span>
+
+                          ) : (
+
+                            <span className="flex items-center gap-1 text-green-600 font-medium">
+
+                              <CheckCircleIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+
+                              Completed
+
+                            </span>
+
+                          )}
+
+                        </div>
+
+                        {/* PROGRESS BAR */}
+
+                        <div className="w-full h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden">
+
+                          <div
+                            className={`h-full rounded-full transition-all duration-1000 ${
+                              isPending
+                                ? 'bg-gradient-to-r from-orange-400 to-orange-600'
+                                : 'bg-gradient-to-r from-green-400 to-green-600'
+                            }`}
+                            style={{
+                              width:
+                                isPending
+                                  ? '50%'
+                                  : '100%',
+                            }}
+                          />
+
+                        </div>
+
                       </div>
+
                     </div>
 
-                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
-                      <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500 mb-1">
-                        <span>Payment Status</span>
-                        <span className="flex items-center gap-1 text-green-600 font-medium">
-                          <CheckCircleIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                          Completed
-                        </span>
-                      </div>
-                      <div className="w-full h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-1000"
-                          style={{ width: '100%' }}
-                        />
-                      </div>
-                    </div>
                   </div>
-                </div>
-              );
-            })}
+
+                );
+
+              }
+            )}
+
           </div>
 
-          {/* Loader for infinite scroll */}
-          <div ref={loaderRef} className="flex justify-center py-4">
+          {/* =================================================
+              INFINITE SCROLL
+          ================================================= */}
+
+          <div
+            ref={loaderRef}
+            className="flex justify-center py-4"
+          >
+
             {loadingMore && (
+
               <div className="flex items-center gap-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                <span className="text-sm text-gray-500">Loading more paid returns...</span>
+
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+
+                <span className="text-sm text-gray-500">
+
+                  Loading more returns...
+
+                </span>
+
               </div>
+
             )}
-            {!hasMore && returns.length > 0 && (
-              <div className="text-center py-4">
-                <p className="text-sm text-gray-400">You've seen all {returns.length} paid returns</p>
-              </div>
-            )}
-            {!loadingMore && hasMore && returns.length >= 20 && (
-              <div className="text-center py-2">
-                <p className="text-xs text-gray-400">Scroll down to load more</p>
-              </div>
-            )}
+
+            {!hasMore &&
+              returns.length >
+                0 && (
+
+                <div className="text-center py-4">
+
+                  <p className="text-sm text-gray-400">
+
+                    You've seen all{' '}
+                    {
+                      returns.length
+                    }{' '}
+                    returns
+
+                  </p>
+
+                </div>
+
+              )}
+
+            {!loadingMore &&
+              hasMore &&
+              returns.length >=
+                itemsPerPage && (
+
+                <div className="text-center py-2">
+
+                  <p className="text-xs text-gray-400">
+
+                    Scroll down to load more
+
+                  </p>
+
+                </div>
+
+              )}
+
           </div>
+
         </>
+
       )}
+
     </div>
   );
 };
