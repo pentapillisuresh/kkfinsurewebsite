@@ -6,6 +6,8 @@ import React, {
 } from 'react';
 
 import { userApi } from '../api';
+import usePagination from '../hooks/usePagination';
+import Pagination from '../components/Common/Pagination';
 
 import {
   CurrencyRupeeIcon,
@@ -32,18 +34,21 @@ const TYPE_ICONS = {
 const Returns = () => {
   const [type, setType] = useState('');
   const [returns, setReturns] = useState([]);
-
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-
   const [error, setError] = useState(null);
 
-  const loaderRef = useRef(null);
+  // =========================================================
+  // PAGINATION
+  // =========================================================
 
-  const itemsPerPage = 20;
+  const {
+    currentPage,
+    totalPages,
+    currentData,
+    goToPage,
+    totalItems,
+    itemsPerPage,
+  } = usePagination(returns, 20);
 
   // =========================================================
   // TOTAL PAID RETURNS FROM LOCAL STORAGE
@@ -80,15 +85,14 @@ const Returns = () => {
   // FETCH RETURNS
   // =========================================================
 
-  const fetchReturns = async (
-    pageNum,
-    resetData = false
-  ) => {
+  const fetchReturns = async () => {
     try {
+      setLoading(true);
+      setError(null);
+
       const { data } = await userApi.getReturns({
         type: type || undefined,
-        page: pageNum,
-        limit: itemsPerPage,
+        limit: 1000 // Fetch all returns for pagination
       });
 
       if (data.success) {
@@ -106,29 +110,7 @@ const Returns = () => {
             ret.status === 'active'
         );
 
-        const totalCount =
-          data.data?.total || 0;
-
-        if (resetData) {
-          setReturns(filteredReturns);
-        } else {
-          setReturns((prev) => [
-            ...prev,
-            ...filteredReturns,
-          ]);
-        }
-
-        const currentTotal = resetData
-          ? filteredReturns.length
-          : returns.length +
-            filteredReturns.length;
-
-        setHasMore(
-          currentTotal < totalCount &&
-            allReturns.length === itemsPerPage
-        );
-
-        setPage(pageNum);
+        setReturns(filteredReturns);
       } else {
         setError(
           data.message ||
@@ -147,7 +129,6 @@ const Returns = () => {
       );
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   };
 
@@ -156,74 +137,9 @@ const Returns = () => {
   // =========================================================
 
   useEffect(() => {
-    setLoading(true);
-    setReturns([]);
-    setPage(1);
-    setHasMore(true);
-    setError(null);
-
-    fetchReturns(1, true);
-
+    fetchReturns();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
-
-  // =========================================================
-  // INFINITE SCROLL
-  // =========================================================
-
-  const handleObserver = useCallback(
-    (entries) => {
-      const target = entries[0];
-
-      if (
-        target.isIntersecting &&
-        hasMore &&
-        !loading &&
-        !loadingMore
-      ) {
-        setLoadingMore(true);
-
-        fetchReturns(page + 1);
-      }
-    },
-    [
-      hasMore,
-      loading,
-      loadingMore,
-      page,
-      type,
-      returns.length,
-    ]
-  );
-
-  useEffect(() => {
-    const option = {
-      root: null,
-      rootMargin: '20px',
-      threshold: 0,
-    };
-
-    const observer =
-      new IntersectionObserver(
-        handleObserver,
-        option
-      );
-
-    const currentLoader =
-      loaderRef.current;
-
-    if (currentLoader) {
-      observer.observe(currentLoader);
-    }
-
-    return () => {
-      if (currentLoader) {
-        observer.unobserve(
-          currentLoader
-        );
-      }
-    };
-  }, [handleObserver]);
 
   // =========================================================
   // TYPE LABEL
@@ -308,9 +224,10 @@ const Returns = () => {
   };
 
   // =========================================================
-  // CURRENT MONTH PAID RETURNS
+  // CALCULATIONS
   // =========================================================
 
+  // Current month paid returns
   const currentMonthPaidReturns =
     returns
       .filter((r) => {
@@ -342,20 +259,147 @@ const Returns = () => {
         0
       );
 
-  // =========================================================
-  // PAID RETURNS COUNT
-  // =========================================================
+  // Current month pending returns
+  const currentMonthPendingReturns =
+    returns
+      .filter((r) => {
+        if (!r.month) {
+          return false;
+        }
 
+        const date = new Date(
+          r.month
+        );
+
+        const now = new Date();
+
+        return (
+          r.type === 'monthly' &&
+          isPendingStatus(r.status) &&
+          date.getMonth() ===
+            now.getMonth() &&
+          date.getFullYear() ===
+            now.getFullYear()
+        );
+      })
+      .reduce(
+        (sum, r) =>
+          sum +
+          Number.parseFloat(
+            r.amount || 0
+          ),
+        0
+      );
+
+  // Current month returns count
+  const currentMonthPaidCount =
+    returns.filter((r) => {
+      if (!r.month) return false;
+      const date = new Date(r.month);
+      const now = new Date();
+      return (
+        r.type === 'monthly' &&
+        isPaidStatus(r.status) &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear()
+      );
+    }).length;
+
+  const currentMonthPendingCount =
+    returns.filter((r) => {
+      if (!r.month) return false;
+      const date = new Date(r.month);
+      const now = new Date();
+      return (
+        r.type === 'monthly' &&
+        isPendingStatus(r.status) &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear()
+      );
+    }).length;
+
+  // Determine current month status
+  const getCurrentMonthStatus = () => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    // Check if there are any monthly returns for current month
+    const currentMonthReturns = returns.filter((r) => {
+      if (!r.month || r.type !== 'monthly') return false;
+      const date = new Date(r.month);
+      return (
+        date.getMonth() === currentMonth &&
+        date.getFullYear() === currentYear
+      );
+    });
+
+    if (currentMonthReturns.length === 0) {
+      return { 
+        label: 'No Current Month', 
+        color: 'text-gray-500', 
+        icon: DocumentTextIcon,
+        subtext: 'No monthly returns for this month'
+      };
+    }
+
+    const paidInCurrentMonth = currentMonthReturns.filter((r) => 
+      isPaidStatus(r.status)
+    );
+    const pendingInCurrentMonth = currentMonthReturns.filter((r) => 
+      isPendingStatus(r.status)
+    );
+
+    if (paidInCurrentMonth.length > 0 && pendingInCurrentMonth.length === 0) {
+      return { 
+        label: 'All Paid', 
+        color: 'text-green-600', 
+        icon: CheckCircleIcon,
+        subtext: `${paidInCurrentMonth.length} returns paid this month`
+      };
+    }
+
+    if (pendingInCurrentMonth.length > 0 && paidInCurrentMonth.length === 0) {
+      return { 
+        label: 'All Pending', 
+        color: 'text-orange-600', 
+        icon: ClockIcon,
+        subtext: `${pendingInCurrentMonth.length} returns pending this month`
+      };
+    }
+
+    if (paidInCurrentMonth.length > 0 && pendingInCurrentMonth.length > 0) {
+      return { 
+        label: 'Mixed', 
+        color: 'text-yellow-600', 
+        icon: ClockIcon,
+        subtext: `${paidInCurrentMonth.length} paid, ${pendingInCurrentMonth.length} pending`
+      };
+    }
+
+    return { label: 'Unknown', color: 'text-gray-500', icon: DocumentTextIcon };
+  };
+
+  const currentMonthStatus = getCurrentMonthStatus();
+  const StatusIcon = currentMonthStatus.icon;
+
+  // Paid returns count (overall)
   const paidReturnsCount =
     returns.filter((r) =>
       isPaidStatus(r.status)
+    ).length;
+
+  // Pending returns count (overall)
+  const pendingReturnsCount =
+    returns.filter((r) =>
+      isPendingStatus(r.status)
     ).length;
 
   // =========================================================
   // LOADING SCREEN
   // =========================================================
 
-  if (loading && page === 1) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
 
@@ -484,7 +528,7 @@ const Returns = () => {
       </div>
 
       {/* =====================================================
-          STATS CARDS
+          STATS CARDS - CURRENT MONTH STATUS
       ===================================================== */}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
@@ -521,6 +565,12 @@ const Returns = () => {
 
           </p>
 
+          {currentMonthPendingReturns > 0 && (
+            <p className="text-xs text-orange-500 mt-1">
+              Pending: ₹{currentMonthPendingReturns.toLocaleString()}
+            </p>
+          )}
+
         </div>
 
         {/* PAID RETURNS COUNT */}
@@ -537,23 +587,39 @@ const Returns = () => {
 
           </p>
 
+          {pendingReturnsCount > 0 && (
+            <p className="text-xs text-gray-400 mt-1">
+              {pendingReturnsCount} pending
+            </p>
+          )}
+
         </div>
 
-        {/* STATUS */}
+        {/* CURRENT MONTH STATUS - DYNAMIC */}
 
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-4 border border-gray-100">
 
           <p className="text-xs sm:text-sm text-gray-500">
-            Status
+            Current Month Status
           </p>
 
-          <p className="text-lg sm:text-2xl font-bold text-green-600 flex items-center gap-1">
+          <div className="flex flex-col">
 
-            <CheckCircleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            <p className={`text-lg sm:text-2xl font-bold ${currentMonthStatus.color} flex items-center gap-1`}>
 
-            Paid
+              <StatusIcon className="h-5 w-5 sm:h-6 sm:w-6" />
 
-          </p>
+              {currentMonthStatus.label}
+
+            </p>
+
+            {currentMonthStatus.subtext && (
+              <p className="text-xs text-gray-400 mt-1">
+                {currentMonthStatus.subtext}
+              </p>
+            )}
+
+          </div>
 
         </div>
 
@@ -656,7 +722,7 @@ const Returns = () => {
 
           <div className="space-y-3 sm:space-y-4">
 
-            {returns.map(
+            {currentData.map(
               (ret) => {
 
                 const TypeIcon =
@@ -949,68 +1015,23 @@ const Returns = () => {
           </div>
 
           {/* =================================================
-              INFINITE SCROLL
+              PAGINATION
           ================================================= */}
 
-          <div
-            ref={loaderRef}
-            className="flex justify-center py-4"
-          >
+          {returns.length > 0 && (
+            <div className="mt-4">
 
-            {loadingMore && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                showInfo={true}
+              />
 
-              <div className="flex items-center gap-3">
-
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
-
-                <span className="text-sm text-gray-500">
-
-                  Loading more returns...
-
-                </span>
-
-              </div>
-
-            )}
-
-            {!hasMore &&
-              returns.length >
-                0 && (
-
-                <div className="text-center py-4">
-
-                  <p className="text-sm text-gray-400">
-
-                    You've seen all{' '}
-                    {
-                      returns.length
-                    }{' '}
-                    returns
-
-                  </p>
-
-                </div>
-
-              )}
-
-            {!loadingMore &&
-              hasMore &&
-              returns.length >=
-                itemsPerPage && (
-
-                <div className="text-center py-2">
-
-                  <p className="text-xs text-gray-400">
-
-                    Scroll down to load more
-
-                  </p>
-
-                </div>
-
-              )}
-
-          </div>
+            </div>
+          )}
 
         </>
 
