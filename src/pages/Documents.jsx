@@ -19,7 +19,7 @@ const Documents = () => {
   const [investments, setInvestments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const baseURL = "https://service.kkfinsure.org"; // or from env
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -325,8 +325,8 @@ const Documents = () => {
                   </div>
                   <div className="flex-shrink-0">
                     <a
-                      href={doc.filePath}
-                      target="_blank"
+                      href={`${baseURL}/${doc.filePath}`} 
+                      target="_blank" 
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-all duration-200 group-hover:shadow-md text-xs sm:text-sm font-medium"
                     >
