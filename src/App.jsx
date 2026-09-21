@@ -24,6 +24,7 @@ import TicketDetails from './pages/TicketDetails';
 import Settings from './pages/Settings';
 import ROI from './pages/ROI';
 import { useWindowSize } from './hooks/useWindowSize';
+import Offers from './pages/Offers';
 
 const AppContent = () => {
   const { user, loading } = useAuth();
@@ -72,6 +73,7 @@ const AppContent = () => {
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/tickets/:id" element={<TicketDetails />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/offers" element={<Offers />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

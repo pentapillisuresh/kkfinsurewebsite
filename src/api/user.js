@@ -32,6 +32,15 @@ export const userApi = {
   getReferralDetails: (id) => api.get(`/users/referrals/${id}`),
   getReferralStats: () => api.get('/users/referrals/stats'),
 
+
+ // Offers
+  getActiveOffers: () =>
+    api.get('/offers'),
+
+  getOfferById: (id) =>
+    api.get(`/offers/${id}`),
+
+
   // Points
   getPoints: () => api.get('/users/points'),
   getPointHistory: (params) => api.get('/users/points/history', { params }),

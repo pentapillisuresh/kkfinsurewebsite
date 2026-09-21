@@ -12,6 +12,7 @@ import {
   TicketIcon,
   Cog6ToothIcon,
   ArrowTrendingUpIcon,
+  
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 
@@ -28,6 +29,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/balance-sheet', label: 'Balance Sheet', icon: DocumentTextIcon },
     { path: '/documents', label: 'Documents', icon: DocumentTextIcon },
     { path: '/referrals', label: 'Referrals', icon: GiftIcon },
+     { path: '/offers', label: 'Offers', icon: GiftIcon },
     { path: '/points', label: 'Points', icon: SparklesIcon },
     { path: '/tickets', label: 'Tickets', icon: TicketIcon },
     { path: '/settings', label: 'Settings', icon: Cog6ToothIcon },
