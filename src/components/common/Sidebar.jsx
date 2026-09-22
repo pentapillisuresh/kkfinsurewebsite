@@ -25,13 +25,13 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/investments', label: 'Investments', icon: ChartBarIcon },
     { path: '/returns', label: 'Returns', icon: CurrencyRupeeIcon },
     { path: '/roi', label: 'ROI & Returns', icon: ArrowTrendingUpIcon },
-    { path: '/profile', label: 'Profile', icon: UserIcon },
     { path: '/balance-sheet', label: 'Balance Sheet', icon: DocumentTextIcon },
     { path: '/documents', label: 'Documents', icon: DocumentTextIcon },
     { path: '/referrals', label: 'Referrals', icon: GiftIcon },
-     { path: '/offers', label: 'Offers', icon: GiftIcon },
-    { path: '/points', label: 'Points', icon: SparklesIcon },
+    { path: '/offers', label: 'Offers', icon: GiftIcon },
+    // { path: '/points', label: 'Points', icon: SparklesIcon },
     { path: '/tickets', label: 'Tickets', icon: TicketIcon },
+    { path: '/profile', label: 'Profile', icon: UserIcon },
     { path: '/settings', label: 'Settings', icon: Cog6ToothIcon },
   ];
 
