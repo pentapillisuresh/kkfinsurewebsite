@@ -7,7 +7,7 @@ import {
   PhoneIcon,
   CalendarIcon,
   IdentificationIcon,
-  MapPinIcon,
+  MapPinIcon,DevicePhoneMobileIcon,
   UserIcon,
   ShieldCheckIcon,
   CheckCircleIcon,
@@ -22,6 +22,36 @@ import {
   ArrowDownTrayIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
+
+const Section = ({ title, icon: Icon, children }) => {
+  return (
+    <section className="mb-6 p-4 sm:p-6 border-b border-gray-100 bg-gray-50">
+      <div className="flex items-center gap-2 mb-4">
+        {Icon && <Icon className="w-5 h-5" />}
+        <h2 className="text-lg font-semibold">{title}</h2>
+      </div>
+
+      <div className="space-y-3">
+        {children}
+      </div>
+    </section>
+  );
+};
+
+const InfoRow = ({ label, value }) => {
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4 py-2">
+      <span className="font-medium text-gray-600 sm:w-44">
+        {label}
+      </span>
+
+      <span className="text-gray-900 whitespace-pre-line">
+        {value}
+      </span>
+    </div>
+  );
+};
+
 
 const Profile = () => {
   const { user } = useAuth();
@@ -490,6 +520,51 @@ const Profile = () => {
           </div>
         </div>
       )}
+
+      <div className='bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 overflow-hidden'>
+        {/* Support Info */}
+<Section title="Support" icon={DevicePhoneMobileIcon}>
+  <InfoRow
+    label="Support Email"
+    value="support@kkfinsure.com"
+  />
+
+  <InfoRow
+    label="Compliance Support"
+    value="compliancekkfi@gmail.com"
+  />
+
+  <InfoRow
+    label="Support Phone"
+    value="+91 9483413311"
+  />
+
+  <InfoRow
+    label="Company Address"
+    value={
+      <>
+        CTS No. 338, 1st Main West, 5th Cross,
+        <br />
+        Kumarswami Layout,
+        <br />
+        Belgaum – 590019, Karnataka
+      </>
+    }
+  />
+
+  <InfoRow
+    label="Corp Office"
+    value={
+      <>
+        Mantri IT Park, Viman Nagar, Pune
+        <br />
+        Maharashtra - 411014
+      </>
+    }
+  />
+</Section>
+
+      </div>
     </div>
   );
 };
